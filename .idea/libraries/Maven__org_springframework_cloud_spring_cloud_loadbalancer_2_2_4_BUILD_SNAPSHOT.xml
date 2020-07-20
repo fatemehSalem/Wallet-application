@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: org.springframework.cloud:spring-cloud-loadbalancer:2.2.4.BUILD-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200710.093959-46.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200714.095636-51.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200710.093959-46-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200714.095636-51-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200710.093959-46-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-loadbalancer/2.2.4.BUILD-SNAPSHOT/spring-cloud-loadbalancer-2.2.4.BUILD-20200714.095636-51-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

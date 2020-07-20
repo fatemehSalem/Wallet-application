@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: org.springframework.boot:spring-boot-starter-reactor-netty:2.3.2.BUILD-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200710.145531-64.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200714.164648-69.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200710.145531-64-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200714.164648-69-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200710.145531-64-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-starter-reactor-netty/2.3.2.BUILD-SNAPSHOT/spring-boot-starter-reactor-netty-2.3.2.BUILD-20200714.164648-69-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

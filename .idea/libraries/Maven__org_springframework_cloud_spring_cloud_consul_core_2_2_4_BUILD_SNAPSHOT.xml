@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: org.springframework.cloud:spring-cloud-consul-core:2.2.4.BUILD-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200711.080340-341.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200715.080347-372.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200711.080340-341-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200715.080347-372-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200711.080340-341-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-consul-core/2.2.4.BUILD-SNAPSHOT/spring-cloud-consul-core-2.2.4.BUILD-20200715.080347-372-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
