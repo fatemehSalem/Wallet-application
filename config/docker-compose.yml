@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+    config:
+        image: springio/gs-spring-boot-docker 
+        ports:
+            - "8080:8080"
+        container_name: config-service
+        command: []
+        network_mode: "host"
+    
