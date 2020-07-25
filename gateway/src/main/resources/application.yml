@@ -5,6 +5,9 @@ spring:
     consul:
       host: consul
       port: 8500
+    loadbalancer:
+      ribbon:
+        enabled: false
 
 server:
   port: 8080
