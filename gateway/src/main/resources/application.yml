@@ -11,3 +11,20 @@ spring:
 
 server:
   port: 8080
+
+---
+
+spring:
+  profiles: dev
+  application:
+    name: gateway
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+    loadbalancer:
+      ribbon:
+        enabled: false
+
+server:
+  port: 0

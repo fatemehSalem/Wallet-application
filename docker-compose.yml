@@ -14,7 +14,7 @@ services:
             - "8080"
         container_name: config-service
         restart: on-failure
-        depends_on: 
+        depends_on:
             - consul
 
     gateway:
@@ -23,7 +23,7 @@ services:
             - "8080"
         container_name: gateway-service
         restart: on-failure
-        depends_on: 
+        depends_on:
             - consul
 
     order:
@@ -32,7 +32,7 @@ services:
             - "8080"
         container_name: order-service
         restart: on-failure
-        depends_on: 
+        depends_on:
             - consul
 
     trader:
@@ -41,7 +41,7 @@ services:
             - "8080"
         container_name: trader-service
         restart: on-failure
-        depends_on: 
+        depends_on:
             - consul
     
 networks:
