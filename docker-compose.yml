@@ -43,6 +43,15 @@ services:
         restart: on-failure
         depends_on:
             - consul
+
+    account:
+        build: ./account
+        ports:
+            - "8080"
+        container_name: trader-service
+        restart: on-failure
+        depends_on:
+            - consul
     
 networks:
     default:
