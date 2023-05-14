@@ -48,7 +48,7 @@ services:
         build: ./account
         ports:
             - "8080"
-        container_name: trader-service
+        container_name: account-service
         restart: on-failure
         depends_on:
             - consul
