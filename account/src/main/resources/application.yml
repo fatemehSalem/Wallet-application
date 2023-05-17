@@ -1,3 +1,6 @@
+api:
+  base-uri: "https://stsapiuat.walletgate.io/v1/Account/"
+#--------------------------------------------------------------
 spring:
   application:
     name: account

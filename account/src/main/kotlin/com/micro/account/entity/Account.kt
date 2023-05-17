@@ -3,33 +3,59 @@ package com.micro.account.entity
 import lombok.*
 import javax.persistence.*
 
-@NoArgsConstructor
-@ToString
-@Getter
-@Setter
+
 @Entity
-@Table( name = "account")
-class Account {
+@Table(name = "account")
+@Data
+@AllArgsConstructor
+@Builder
+data class Account(
+/* By default, properties of a data class are declared as val (read-only)
+which means that they are immutable. However, you can still declare a var property in a data class if you need to.*/
   @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  var id: Long? = 0,
 
-    /* @Column(nullable = true)
-   var account_number: String,
+  @Column(name = "account_number", nullable = true)
+  var accountNumber: String,
 
-   @Column(nullable = false)
-   var currency_code: String,
+  @Column(name = "currency_code", nullable = false)
+  var currencyCode: String,
 
-   var alias: String,
-   var user_number: String,
-   var user_first_name: String,
-   var user_last_name: String,
-   var user_phone_country_code: String,
-   var user_phone_number: String,
-   var user_email: String,
-   var address_line1: String,
-   var address_line2: String,
-   var zip_postal_code: String,
-   var state_province_code: String,*/
+  @Column(name = "alias", nullable = false)
+  var alias: String,
 
+  @Column(name = "user_number", nullable = false ,  unique = true)
+  var userNumber: String,
+
+  @Column(name = "user_first_name", nullable = false)
+  var userFirstName: String,
+
+  @Column(name = "user_last_name", nullable = false)
+  var userLastName: String,
+
+  @Column(name = "user_phone_country_code", nullable = false)
+  var userPhoneCountryCode: String,
+
+  @Column(name = "user_phone_number", nullable = false , unique = true)
+  var userPhoneNumber: String,
+
+  @Column(name = "user_email", nullable = false,  unique = true)
+  var userEmail: String,
+
+  @Column(name = "address_line1", nullable = false)
+  var addressLine1: String,
+
+  @Column(name = "address_line2", nullable = false)
+  var addressLine2: String,
+
+  @Column(name = "zip_postal_code", nullable = false)
+  var zipPostalCode: String,
+
+  @Column(name = "state_province_code", nullable = false)
+  var stateProvinceCode: String
+){
+  constructor() : this(null, "", "", "",
+  "","","","","","","",
+            "","" ,"")
 }
