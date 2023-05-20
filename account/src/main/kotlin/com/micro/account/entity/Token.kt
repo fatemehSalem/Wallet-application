@@ -1,13 +1,10 @@
 package com.micro.account.entity
 
-import lombok.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "accessToken")
-@Data
-@AllArgsConstructor
-@Builder
+
 data class Token(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -12,7 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class TokenRetriever(private val webClient: WebClient) {
     @Autowired
     private lateinit var tokenRepository: TokenRepository
-    fun retrieveToken(phoneNumber: String): String {
+    fun retrieveToken(phoneNumber: String) {
         val client_id = "EE85AF95-EBD3-4D29-800C-3E8BE9340EBD"
         val client_secret = "D44C41B4-E71F-425F-BBCA-99585DC331DB"
         val requestBody = "grant_type=client_credentials&client_id=$client_id&client_secret=$client_secret"
@@ -30,9 +30,9 @@ class TokenRetriever(private val webClient: WebClient) {
                 token.accessToken = tokenResponse.access_token
                 token.userPhoneNumber = phoneNumber
                 tokenRepository.save(token)
-                return tokenResponse.access_token
+               // return tokenResponse.access_token
             }
         }
-        return tokenResponse?.access_token ?: throw IllegalStateException("Token retrieval failed")
+      //  return tokenResponse?.access_token ?: throw IllegalStateException("Token retrieval failed")
     }
 }

@@ -6,10 +6,8 @@ import com.micro.account.entity.AccountResponse
 import com.micro.account.repository.AccountRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
-import org.springframework.security.crypto.bcrypt.BCrypt
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
 
 @Service
 class AccountService(private val webClient: WebClient,
@@ -60,10 +58,26 @@ class AccountService(private val webClient: WebClient,
     }
 
 
-    fun authenticate(username: String, phoneNumber: String): Boolean {
-        val user = accountRepository.findByUserNumber(username)
-        return user != null && user.userPhoneNumber == phoneNumber
+    fun authenticate(userEmail: String, phoneNumber: String): Boolean {
+        var user = Account()
+        var retVal: Boolean = false
+        if(userEmail != null){
+             user = accountRepository.findByUserEmail(userEmail)!!
+            retVal = user != null && user.userEmail == userEmail
+        } else if(phoneNumber!= null){
+            user = accountRepository.findByUserPhoneNumber(phoneNumber)!!
+            retVal = user != null && user.userPhoneNumber == phoneNumber
+        }
+        return retVal
     }
 
+    fun generateOtp(request: String, userEmail: String) {
+        val responseMono = webClient.post()
+            .uri("http://otp-service/api/otp/generateOtp:8080")
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+
+    }
 
 }

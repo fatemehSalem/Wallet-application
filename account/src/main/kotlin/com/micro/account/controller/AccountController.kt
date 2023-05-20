@@ -4,18 +4,16 @@ import com.micro.account.entity.*
 import com.micro.account.service.AccountService
 import com.micro.account.service.TokenRetriever
 import com.micro.account.service.TokenService
-import io.netty.handler.codec.spdy.SpdyStreamStatus.INVALID_CREDENTIALS
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Mono
 import org.springframework.http.HttpStatus
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/account")
 class AccountController {
 
     @Autowired
@@ -28,11 +26,13 @@ class AccountController {
     private lateinit var tokenRetriever: TokenRetriever
 
 
+
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
-        if (accountService.authenticate(loginRequest.username, loginRequest.phoneNumber)) {
+        if (accountService.authenticate(loginRequest.userEmail, loginRequest.phoneNumber)) {
             // Authentication successful
-            val access_token = tokenRetriever.retrieveToken(loginRequest.phoneNumber)
+            //generate Provider Auth Token
+            tokenRetriever.retrieveToken(loginRequest.phoneNumber)
             return ResponseEntity.ok().body("Authentication/login was successful")
         } else {
             // Authentication failed
@@ -41,6 +41,12 @@ class AccountController {
             val errorResponse = ErrorResponse(errorCode, errorMessage)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
         }
+    }
+
+    //After successful Authentication
+    @PostMapping("/generateOtp")
+    fun generateOtp(@RequestBody request: GenerateOtpRequest) {
+        return accountService.generateOtp(request.phoneNumber , request.userEmail)
     }
 
     @PostMapping("/createNewAccount")

@@ -1,20 +1,20 @@
 package com.micro.account.entity
 
-import lombok.*
+import java.util.*
 import javax.persistence.*
 
 
 @Entity
 @Table(name = "account")
-@Data
-@AllArgsConstructor
-@Builder
+
 data class Account(
 /* By default, properties of a data class are declared as val (read-only)
 which means that they are immutable. However, you can still declare a var property in a data class if you need to.*/
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = 0,
+  @GeneratedValue
+  var id: UUID? = null,
+ /* @GeneratedValue(strategy = GenerationType.IDENTITY)
+  var id: Long? = 0,*/
 
   @Column(name = "account_number", nullable = true)
   var accountNumber: String,
