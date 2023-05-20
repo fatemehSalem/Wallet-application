@@ -1,7 +1,7 @@
 version: "3.8"
 services:
     consul:
-        image: consul 
+        image: consul
         ports:
             - "8500:8500"
             - "8600:8600/udp"
@@ -18,7 +18,7 @@ services:
             - consul
         env_file:
             - .env.development
-#            - .env.stage
+            - .env.stage
 #            - .env.production
 
     gateway:
@@ -86,7 +86,6 @@ services:
 #            - .env.stage
 #            - .env.production
 
-
     postgres:
         container_name: postgres
         image: postgres
@@ -116,6 +115,18 @@ services:
         networks:
             - postgres
         restart: unless-stopped
+
+#networks:
+#    default:
+#        name: spring-cloud-microservices
 networks:
-    default:
-        name: spring-cloud-microservices
+    postgres:
+        driver: bridge
+    spring:
+        driver: bridge
+
+volumes:
+    postgres:
+    pgadmin:
+
+#pgAdminPasswprd: HepC@rd@123321@

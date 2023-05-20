@@ -18,6 +18,21 @@ spring:
   profiles: dev
   application:
     name: otp
+    datasource:
+      password: passwordHEPCARDapp
+      url: jdbc:postgresql://postgres:5432/otp
+#        url: jdbc:postgresql://localhost:5432/otp
+      username: hepcardApp
+      driver-class-name: org.postgresql.Driver
+      jpa:
+        hibernate:
+          # ddl-auto: update
+          ddl-auto: create-drop
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQLDialect
+            format_sql: true
+        show-sql: true
   cloud:
     consul:
       host: localhost

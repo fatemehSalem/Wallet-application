@@ -1,5 +1,6 @@
 package com.micro.account.entity
 
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -7,8 +8,8 @@ import javax.persistence.*
 
 data class Token(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null,
+    @GeneratedValue
+    var id: UUID? = null,
 
 /*    @Column(name = "user_number", nullable = false ,  unique = true)
     val userNumber: String,

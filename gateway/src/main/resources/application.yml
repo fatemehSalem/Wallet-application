@@ -22,6 +22,25 @@ spring:
     consul:
       host: localhost
       port: 8500
+      routes:
+        - id: account
+          uri: http://account:8080
+          predicates:
+            - Path=/account/**
+          filters:
+            - StripPrefix=1
+        - id: otp
+          uri: http://otp:8080
+          predicates:
+            - Path=/otp/**
+          filters:
+            - StripPrefix=1
+        - id: order
+          uri: http://order:8080
+          predicates:
+            - Path=/order/**
+          filters:
+            - StripPrefix=1
     loadbalancer:
       ribbon:
         enabled: false
