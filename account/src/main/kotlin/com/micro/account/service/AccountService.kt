@@ -23,7 +23,6 @@ class AccountService(private val webClient: WebClient,
     }
 
     fun createNewAccount(access_token: String, accountRequest: AccountRequest){
-
         val responseEntity: ResponseEntity<AccountResponse>? = webClient.post()
             .uri("$baseUri/RegisterPersonalAccount")
             .header("Authorization", "Bearer $access_token")
@@ -70,6 +69,7 @@ class AccountService(private val webClient: WebClient,
         if(phoneNumberOrEmail != null){
             var  user = accountRepository.findByUserPhoneNumber(phoneNumberOrEmail)!!
             retVal = user != null && user.userPhoneNumber == phoneNumberOrEmail && verifyPassword(password,user.password)
+               // generateOtp(phoneNumberOrEmail)
         }
         return retVal
     }
@@ -80,7 +80,6 @@ class AccountService(private val webClient: WebClient,
             .bodyValue(request)
             .retrieve()
             .bodyToMono(String::class.java)
-
     }
 
 }

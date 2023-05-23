@@ -106,6 +106,7 @@ internal class WebSecurityConfig{
     companion object {
         private val WHITELIST = arrayOf(
             "/api/account/login",
+            "/api/otp/**",
             "/v2/api-docs",
             "/configuration/ui",
             "/swagger-resources/**",

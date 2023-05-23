@@ -22,14 +22,11 @@ class AccountController {
     @Autowired
     private lateinit var tokenRetriever: TokenRetriever
 
-
-
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
-        return if (accountService.authenticate(loginRequest.phoneNumberOrEmail ,loginRequest.password )) {
-            accountService.generateOtp(loginRequest.phoneNumberOrEmail)
-            ResponseEntity(accountService.findByUserPhoneNumber(loginRequest.phoneNumberOrEmail )?.id, HttpStatus.OK)
-
+    fun login(@RequestBody loginRequest: LoginRequest) {
+         if (accountService.authenticate(loginRequest.phoneNumberOrEmail ,loginRequest.password )) {
+             accountService.generateOtp(loginRequest.phoneNumberOrEmail)
+             ResponseEntity(accountService.findByUserPhoneNumber(loginRequest.phoneNumberOrEmail )?.id, HttpStatus.OK)
         } else {
             // Authentication failed
             val errorCode = ErrorCode.INVALID_PHONE_NUMBER

@@ -87,6 +87,20 @@ services:
 ##            - .env.stage
 ##            - .env.production
 
+    #
+    #    auth:
+    #        build: ./auth
+    #        ports:
+    #            - "8080"
+    #        container_name: auth-service
+    #        restart: on-failure
+    #        depends_on:
+    #            - consul
+    #        env_file:
+    #             - .env.development
+    ##            - .env.stage
+    ##            - .env.production
+
     postgres:
         container_name: postgres
         image: postgres
