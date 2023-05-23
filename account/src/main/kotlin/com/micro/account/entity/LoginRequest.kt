@@ -1,3 +1,3 @@
 package com.micro.account.entity
 
-data class LoginRequest(val userEmail: String, val phoneNumber: String )
+data class LoginRequest(var phoneNumberOrEmail: String, var password:String )

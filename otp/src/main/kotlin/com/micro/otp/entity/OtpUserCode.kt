@@ -10,16 +10,16 @@ data class OtpUserCode(
     @GeneratedValue
     var id: UUID? = null,
 
-    @Column(name = "user_email", unique = true)
+    @Column(name = "user_code", unique = true)
     var otpCode: String,
 
     @Column(name = "user_phone_number",  unique = true)
     var userPhoneNumber: String,
 
-    @Column(name = "user_email", unique = true)
-    var userEmail: String,
+/*    @Column(name = "user_email", unique = true)
+    var userEmail: String,*/
 
     ) {
-    constructor() : this(null , "" , "", "") {
+    constructor() : this(null , "" , "") {
     }
 }

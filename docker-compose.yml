@@ -7,59 +7,59 @@ services:
             - "8600:8600/udp"
         container_name: consul
         command: ["agent", "-server", "-ui", "-node=server-1", "-bootstrap-expect=1", "-client=0.0.0.0"]
-
-    config:
-        build: ./config
-        ports:
-            - "8080"
-        container_name: config-service
-        restart: on-failure
-        depends_on:
-            - consul
-        env_file:
-            - .env.development
-            - .env.stage
-#            - .env.production
-
-    gateway:
-        build: ./gateway
-        ports:
-            - "8080"
-        container_name: gateway-service
-        restart: on-failure
-        depends_on:
-            - consul
-        env_file:
-            - .env.development
+#
+#    config:
+#        build: ./config
+#        ports:
+#            - "8080"
+#        container_name: config-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#        env_file:
+#            - .env.development
 #            - .env.stage
-#            - .env.production
-
-    order:
-        build: ./order
-        ports:
-            - "8080"
-        container_name: order-service
-        restart: on-failure
-        depends_on:
-            - consul
-        env_file:
-            - .env.development
-#            - .env.stage
-#            - .env.production
-
-    trader:
-        build: ./trader
-        ports:
-            - "8080"
-        container_name: trader-service
-        restart: on-failure
-        depends_on:
-            - consul
-        env_file:
-            - .env.development
-#            - .env.stage
-#            - .env.production
-
+##            - .env.production
+#
+#    gateway:
+#        build: ./gateway
+#        ports:
+#            - "8080"
+#        container_name: gateway-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#        env_file:
+#            - .env.development
+##            - .env.stage
+##            - .env.production
+#
+#    order:
+#        build: ./order
+#        ports:
+#            - "8080"
+#        container_name: order-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#        env_file:
+#            - .env.development
+##            - .env.stage
+##            - .env.production
+#
+#    trader:
+#        build: ./trader
+#        ports:
+#            - "8080"
+#        container_name: trader-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#        env_file:
+#            - .env.development
+##            - .env.stage
+##            - .env.production
+#
     account:
         build: ./account
         ports:
@@ -68,23 +68,24 @@ services:
         restart: on-failure
         depends_on:
             - consul
+            - postgres
         env_file:
             - .env.development
-#            - .env.stage
-#            - .env.production
-
-    otp:
-        build: ./otp
-        ports:
-            - "8080"
-        container_name: otp-service
-        restart: on-failure
-        depends_on:
-            - consul
-        env_file:
-            - .env.development
-#            - .env.stage
-#            - .env.production
+            - .env.stage
+            - .env.production
+#
+#    otp:
+#        build: ./otp
+#        ports:
+#            - "8080"
+#        container_name: otp-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#        env_file:
+#            - .env.development
+##            - .env.stage
+##            - .env.production
 
     postgres:
         container_name: postgres
@@ -97,8 +98,6 @@ services:
             - postgres:/data/postgres
         ports:
             - "5432:5432"
-        networks:
-            - postgres
         restart: unless-stopped
 
     pgadmin:
@@ -112,18 +111,11 @@ services:
             - pgadmin:/var/lib/pgadmin
         ports:
             - "5050:80"
-        networks:
-            - postgres
         restart: unless-stopped
 
 #networks:
 #    default:
 #        name: spring-cloud-microservices
-networks:
-    postgres:
-        driver: bridge
-    spring:
-        driver: bridge
 
 volumes:
     postgres:

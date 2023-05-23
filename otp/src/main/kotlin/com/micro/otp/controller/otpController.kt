@@ -18,6 +18,6 @@ class otpController {
 
     @PostMapping("/generateOtp")
     fun generateOtp(@RequestBody request: GenerateOtpRequest): String {
-       return otpService.requestOtp(request.phoneNumber , request.userEmail)
+       return otpService.generateOtp(request.phoneNumber)
     }
 }

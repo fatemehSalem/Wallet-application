@@ -8,24 +8,6 @@ import java.util.*
 @Service
 class OtpService(private val otpRepository: OtpRepository) {
 
-    fun requestOtp(phoneNumber: String , userEmail: String): String {
-
-        val otp = generateOtp()
-        val otpUserCode = OtpUserCode()
-        if(userEmail != null){
-            otpUserCode.userEmail = userEmail
-            otpUserCode.userPhoneNumber =""
-            otpUserCode.otpCode = generateRandomNumber()
-
-        } else if(phoneNumber!= null){
-            otpUserCode.userPhoneNumber = phoneNumber
-            otpUserCode.userEmail = ""
-            otpUserCode.otpCode = splitLastFourDigits(phoneNumber)
-        }
-        otpRepository.save(otpUserCode)
-
-        return otp
-    }
 
     private fun splitLastFourDigits(phoneNumber: String): String {
         val digitsOnly = phoneNumber.replace("[^\\d]".toRegex(), "")
@@ -49,14 +31,14 @@ class OtpService(private val otpRepository: OtpRepository) {
         return otp == storedOtp.otpCode
     }
 
-    private fun generateOtp(): String {
-        // Generate a random 6-digit OTP
-        val otp = Random().nextInt(900000) + 100000
-        return otp.toString()
+    fun generateOtp(phoneNumber: String): String {
+        val otpUserCode = OtpUserCode()
+        if(phoneNumber!= null){
+            otpUserCode.userPhoneNumber = phoneNumber
+            otpUserCode.otpCode = splitLastFourDigits(phoneNumber)
+        }
+        otpRepository.save(otpUserCode)
+        return otpUserCode.otpCode
     }
 
-/*    private fun generateOtpAgain(): String {
-       //generate OTP again
-       //Update User previous OTP with new one
-    }*/
 }

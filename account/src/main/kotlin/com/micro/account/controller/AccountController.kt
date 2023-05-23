@@ -6,11 +6,8 @@ import com.micro.account.service.TokenRetriever
 import com.micro.account.service.TokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/account")
@@ -29,24 +26,23 @@ class AccountController {
 
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
-        if (accountService.authenticate(loginRequest.userEmail, loginRequest.phoneNumber)) {
-            // Authentication successful
-            //generate Provider Auth Token
-            tokenRetriever.retrieveToken(loginRequest.phoneNumber)
-            return ResponseEntity.ok().body("Authentication/login was successful")
+        return if (accountService.authenticate(loginRequest.phoneNumberOrEmail ,loginRequest.password )) {
+            accountService.generateOtp(loginRequest.phoneNumberOrEmail)
+            ResponseEntity(accountService.findByUserPhoneNumber(loginRequest.phoneNumberOrEmail )?.id, HttpStatus.OK)
+
         } else {
             // Authentication failed
             val errorCode = ErrorCode.INVALID_PHONE_NUMBER
-            val errorMessage = "Invalid username or phone number"
+            val errorMessage = "Invalid phone number or password"
             val errorResponse = ErrorResponse(errorCode, errorMessage)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
+            ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse)
         }
     }
 
     //After successful Authentication
     @PostMapping("/generateOtp")
     fun generateOtp(@RequestBody request: GenerateOtpRequest) {
-        return accountService.generateOtp(request.phoneNumber , request.userEmail)
+        return accountService.generateOtp(request.phoneNumber)
     }
 
     @PostMapping("/createNewAccount")
@@ -57,6 +53,17 @@ class AccountController {
         return ResponseEntity.status(HttpStatus.OK).body(accountResponse)
        // }
     }
+
+    @GetMapping("/findByUserPhoneNumber/{phoneNumber}")
+        fun findByUserPhoneNumber(@PathVariable phoneNumber: String): LoginRequest? {
+        var account = accountService.findByUserPhoneNumber(phoneNumber)
+        var loginRequest = LoginRequest("" , "")
+        if (account != null) {
+             loginRequest = LoginRequest(password = account.password, phoneNumberOrEmail = account.userPhoneNumber)
+        }
+        return loginRequest
+    }
+
 }
 
 

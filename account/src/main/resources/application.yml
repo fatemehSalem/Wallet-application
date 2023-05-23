@@ -23,7 +23,7 @@ spring:
     name: account
     datasource:
       password: passwordHEPCARDapp
-     url: jdbc:postgresql://postgres:5432/account
+      url: jdbc:postgresql://postgres:5432/account
 #      url: jdbc:postgresql://localhost:5432/account
       username: hepcardApp
       driver-class-name: org.postgresql.Driver
