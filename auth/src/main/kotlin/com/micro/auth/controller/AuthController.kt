@@ -1,6 +1,6 @@
 package com.micro.auth.controller
 
-import com.micro.auth.model.TokenGenerateRequest
+import com.micro.auth.entity.TokenGenerateRequest
 import com.micro.auth.service.JwtTokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping

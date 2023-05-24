@@ -1,6 +1,6 @@
 package com.micro.auth.service
 
-import com.micro.auth.model.AccountDto
+import com.micro.auth.entity.AccountDto
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
