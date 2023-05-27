@@ -1,8 +1,6 @@
 package com.micro.account.service
 
-import com.micro.account.entity.Account
-import com.micro.account.entity.AccountRequest
-import com.micro.account.entity.AccountResponse
+import com.micro.account.entity.*
 import com.micro.account.repository.AccountRepository
 import com.micro.account.utils.PasswordUtils.encryptPassword
 import com.micro.account.utils.PasswordUtils.verifyPassword
@@ -10,17 +8,44 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import java.util.*
 
 @Service
-class AccountService(private val webClient: WebClient,
-                     @Value("\${api.base-uri}")
-                     private val baseUri: String,
-                     private val accountRepository: AccountRepository
+class AccountService(
+    private val webClient: WebClient,
+    @Value("\${api.base-uri}")
+    private val baseUri: String,
+    private val accountRepository: AccountRepository,
 ) {
 
     fun findByUserPhoneNumber(userPhoneNumber : String): Account? {
         return accountRepository.findByUserPhoneNumber(userPhoneNumber)
     }
+
+    fun createNewAccountInMemory(accountRequest: AccountRequest){
+        val accountMap: HashMap<String, AccountDto> = HashMap()
+        var accountDto = AccountDto(
+            accountRequest?.account_number ?: "",
+            encryptPassword(accountRequest.password),
+            accountRequest.currency_code,
+            accountRequest?.alias ?: "",
+            accountRequest?.user_number ?: "",
+            accountRequest.user_first_name,
+            accountRequest.user_last_name,
+            accountRequest.user_phone_country_code,
+            accountRequest.user_phone_number,
+            accountRequest?.user_email ?: "",
+            accountRequest?.contact_address.address_line1 ?: "",
+            accountRequest?.contact_address.address_line2 ?: "",
+            accountRequest?.contact_address.zip_postal_code ?: "",
+            accountRequest?.contact_address.zip_postal_code ?: ""
+        )
+        var userId = UUID.randomUUID().toString()
+        accountMap[userId] = accountDto
+        var request = GenerateOtpRequest(accountRequest.user_phone_number , "1" ,userId)
+        generateOtp(request)
+    }
+
 
     fun createNewAccount(access_token: String, accountRequest: AccountRequest){
         val responseEntity: ResponseEntity<AccountResponse>? = webClient.post()
@@ -34,19 +59,19 @@ class AccountService(private val webClient: WebClient,
         val accountResponse = responseEntity?.body
         if (accountResponse != null) {
             val account = Account()
-            account.accountNumber = accountRequest.account_number ?: ""
+            account.accountNumber = accountRequest?.account_number ?: ""
             account.currencyCode = accountRequest.currency_code
-            account.alias = accountRequest.alias ?: ""
-            account.userNumber = accountRequest.user_number ?: ""
+            account.alias = accountRequest?.alias ?: ""
+            account.userNumber = accountRequest?.user_number ?: ""
             account.userFirstName = accountRequest.user_first_name
             account.userLastName = accountRequest.user_last_name
             account.userPhoneCountryCode = accountRequest.user_phone_country_code
             account.userPhoneNumber = accountRequest.user_phone_number
-            account.userEmail = accountRequest.user_email ?: ""
-            account.addressLine1 = accountRequest.contact_address.address_line1 ?: ""
-            account.addressLine2 = accountRequest.contact_address.address_line2 ?: ""
-            account.zipPostalCode = accountRequest.contact_address.zip_postal_code ?: ""
-            account.stateProvinceCode = accountRequest.contact_address.state_province_code ?: ""
+            account.userEmail = accountRequest?.user_email ?: ""
+            account.addressLine1 = accountRequest?.contact_address.address_line1 ?: ""
+            account.addressLine2 = accountRequest?.contact_address.address_line2 ?: ""
+            account.zipPostalCode = accountRequest?.contact_address.zip_postal_code ?: ""
+            account.stateProvinceCode = accountRequest?.contact_address.state_province_code ?: ""
             account.password = encryptPassword(accountRequest.password)
             accountRepository.save(account)
         }
@@ -66,20 +91,24 @@ class AccountService(private val webClient: WebClient,
 
     fun authenticate(phoneNumberOrEmail: String , password:String): Boolean {
         var retVal = false
-        if(phoneNumberOrEmail != null){
+/*        val map: HashMap<String, Boolean> = HashMap()*/
+        try {
             var  user = accountRepository.findByUserPhoneNumber(phoneNumberOrEmail)!!
             retVal = user != null && user.userPhoneNumber == phoneNumberOrEmail && verifyPassword(password,user.password)
-               // generateOtp(phoneNumberOrEmail)
+        }catch (e:Exception){
+            println("- Error finding user")
         }
         return retVal
     }
 
-    fun generateOtp(request: String) {
-        val responseMono = webClient.post()
+    fun generateOtp(request: GenerateOtpRequest) {
+         webClient.post()
             .uri("http://otp-service/api/otp/generateOtp:8080")
             .bodyValue(request)
             .retrieve()
             .bodyToMono(String::class.java)
     }
+
+
 
 }

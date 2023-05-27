@@ -1,6 +1,7 @@
 package com.micro.account.entity
 
-data class AccountResponse (
+data class
+AccountResponse (
     val status: String,
     val code: String,
     val message: String,

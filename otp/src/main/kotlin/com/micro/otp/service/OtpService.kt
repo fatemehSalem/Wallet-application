@@ -4,7 +4,6 @@ import com.micro.otp.entity.OtpUserCode
 import com.micro.otp.repository.OtpRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
 import java.util.*
 
 @Service
@@ -30,18 +29,15 @@ class OtpService(private val otpRepository: OtpRepository,
         return (r.nextInt(100000 - 999999) + 100000).toString()
     }
 
-    fun verifyOtpCodes(phoneNumber: String,otp: String): Boolean {
-        var storedOtp = OtpUserCode()
-        storedOtp = otpRepository.findByUserPhoneNumber(phoneNumber)
-        return otp == storedOtp.otpCode
+    fun verifyOtpCodes(phoneNumber: String, otp: String): OtpUserCode {
+        return otpRepository.findByUserPhoneNumber(phoneNumber)
     }
 
     fun generateOtp(phoneNumber: String): String {
         val otpUserCode = OtpUserCode()
-        if(phoneNumber!= null){
             otpUserCode.userPhoneNumber = phoneNumber
             otpUserCode.otpCode = splitLastFourDigits(phoneNumber)
-        }
+
         otpRepository.save(otpUserCode)
         return otpUserCode.otpCode
     }
@@ -53,7 +49,7 @@ class OtpService(private val otpRepository: OtpRepository,
             .bodyValue(phoneNumber)
             .retrieve()
             .bodyToMono(String::class.java)
-            .block();
+            .block()
     }
 
 }

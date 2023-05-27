@@ -23,14 +23,14 @@ spring:
     name: account
     datasource:
       password: passwordHEPCARDapp
-      url: jdbc:postgresql://postgres:5432/account
-#      url: jdbc:postgresql://localhost:5432/account
+      url: jdbc:postgresql://postgres:5432/account36971
+      404563
       username: hepcardApp
       driver-class-name: org.postgresql.Driver
       jpa:
         hibernate:
 #          ddl-auto: update
-          ddl-auto: create-drop
+          ddl-auto: create
         properties:
           hibernate:
             dialect: org.hibernate.dialect.PostgreSQLDialect

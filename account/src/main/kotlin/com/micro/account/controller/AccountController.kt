@@ -2,8 +2,6 @@ package com.micro.account.controller
 
 import com.micro.account.entity.*
 import com.micro.account.service.AccountService
-import com.micro.account.service.TokenRetriever
-import com.micro.account.service.TokenService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
@@ -14,18 +12,18 @@ import org.springframework.web.bind.annotation.*
 class AccountController {
 
     @Autowired
-    private lateinit var tokenService: TokenService
-
-    @Autowired
     private lateinit var accountService: AccountService
 
-    @Autowired
-    private lateinit var tokenRetriever: TokenRetriever
 
+    @GetMapping("/testAccountService/{num}")
+    fun test(@PathVariable num: String):String{
+        return "testAccountService is ran!!"
+    }
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest) {
          if (accountService.authenticate(loginRequest.phoneNumberOrEmail ,loginRequest.password )) {
-             accountService.generateOtp(loginRequest.phoneNumberOrEmail)
+             val request = GenerateOtpRequest(loginRequest.phoneNumberOrEmail , "0","123")
+             accountService.generateOtp(request)
              ResponseEntity(accountService.findByUserPhoneNumber(loginRequest.phoneNumberOrEmail )?.id, HttpStatus.OK)
         } else {
             // Authentication failed
@@ -39,24 +37,38 @@ class AccountController {
     //After successful Authentication
     @PostMapping("/generateOtp")
     fun generateOtp(@RequestBody request: GenerateOtpRequest) {
-        return accountService.generateOtp(request.phoneNumber)
+        return accountService.generateOtp(request)
     }
 
-    @PostMapping("/createNewAccount")
-/*    fun createAccount(@RequestBody accountRequest: AccountRequest): Mono<ResponseEntity<AccountResponse>> {*/
-    fun createAccount(@RequestBody accountRequest: AccountRequest): ResponseEntity<Any> {
-        val accountResponse = tokenService.findByUserPhoneNumber(accountRequest.user_phone_number)?.accessToken?.let { accountService.createNewAccount(it, accountRequest) }
-       // return accountResponseMono.map { accountResponse ->
-        return ResponseEntity.status(HttpStatus.OK).body(accountResponse)
-       // }
+    @PostMapping("/createNewAccountBeforeOTP")
+  fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest){
+            //1_Account info stored in Memory and OTP code generated
+            accountService.createNewAccountInMemory(accountRequest)
+             ResponseEntity.status(HttpStatus.OK)
+            // }
+
     }
+/*
+    @PostMapping("/createNewAccountAfterOTP")
+    {
+         val accountResponse =
+                tokenService.findByUserPhoneNumber(accountRequest.user_phone_number)?.accessToken?.let {
+                    accountService.createNewAccount(
+                        it,
+                        accountRequest
+                    )
+                }
+            // return accountResponseMono.map { accountResponse ->
+            return ResponseEntity.status(HttpStatus.OK).body(accountResponse)
+    }
+*/
 
     @GetMapping("/findByUserPhoneNumber/{phoneNumber}")
         fun findByUserPhoneNumber(@PathVariable phoneNumber: String): LoginRequest? {
-        var account = accountService.findByUserPhoneNumber(phoneNumber)
+        val account = accountService.findByUserPhoneNumber(phoneNumber)
         var loginRequest = LoginRequest("" , "")
         if (account != null) {
-             loginRequest = LoginRequest(password = account.password, phoneNumberOrEmail = account.userPhoneNumber)
+             loginRequest = LoginRequest(account.password, account.userPhoneNumber)
         }
         return loginRequest
     }

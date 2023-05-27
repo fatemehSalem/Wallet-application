@@ -25,13 +25,11 @@ class TokenRetriever(private val webClient: WebClient) {
             .bodyToMono(TokenResponse::class.java)
             .block()
         if (tokenResponse != null) {
-            if(tokenResponse.access_token != null){
                 val token = Token()
                 token.accessToken = tokenResponse.access_token
                 token.userPhoneNumber = phoneNumber
                 tokenRepository.save(token)
                // return tokenResponse.access_token
-            }
         }
       //  return tokenResponse?.access_token ?: throw IllegalStateException("Token retrieval failed")
     }
