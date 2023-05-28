@@ -2,6 +2,8 @@ package com.micro.account.controller
 
 import com.micro.account.entity.*
 import com.micro.account.service.AccountService
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/account")
+@Api(tags = ["Account Controller"])
 class AccountController {
 
     @Autowired
@@ -20,6 +23,7 @@ class AccountController {
         return "testAccountService is ran!!"
     }
     @PostMapping("/login")
+    @ApiOperation("Get Login Request")
     fun login(@RequestBody loginRequest: LoginRequest) {
          if (accountService.authenticate(loginRequest.phoneNumberOrEmail ,loginRequest.password )) {
              val request = GenerateOtpRequest(loginRequest.phoneNumberOrEmail , "0","123")
@@ -36,11 +40,13 @@ class AccountController {
 
     //After successful Authentication
     @PostMapping("/generateOtp")
+    @ApiOperation("Generate OTP")
     fun generateOtp(@RequestBody request: GenerateOtpRequest) {
         return accountService.generateOtp(request)
     }
 
     @PostMapping("/createNewAccountBeforeOTP")
+    @ApiOperation("Create New Account")
   fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest){
             //1_Account info stored in Memory and OTP code generated
             accountService.createNewAccountInMemory(accountRequest)
@@ -64,6 +70,7 @@ class AccountController {
 */
 
     @GetMapping("/findByUserPhoneNumber/{phoneNumber}")
+    @ApiOperation("findByUserPhoneNumber")
         fun findByUserPhoneNumber(@PathVariable phoneNumber: String): LoginRequest? {
         val account = accountService.findByUserPhoneNumber(phoneNumber)
         var loginRequest = LoginRequest("" , "")
