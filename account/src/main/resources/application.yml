@@ -1,48 +1,68 @@
 api:
   base-uri: "https://stsapiuat.walletgate.io/v1/Account/"
 #--------------------------------------------------------------
+server:
+  port: 8080
 spring:
   application:
     name: account
   cloud:
     consul:
       host: consul
-      port: 8500
-    loadbalancer:
-      ribbon:
-        enabled: false
-
-server:
-  port: 8080
-
----
-
-spring:
-  profiles: dev
-  application:
-    name: account
-    datasource:
-      password: passwordHEPCARDapp
-      url: jdbc:postgresql://postgres:5432/account36971
-      404563
-      username: hepcardApp
-      driver-class-name: org.postgresql.Driver
-      jpa:
-        hibernate:
-#          ddl-auto: update
-          ddl-auto: create
-        properties:
-          hibernate:
-            dialect: org.hibernate.dialect.PostgreSQLDialect
-            format_sql: true
-        show-sql: true
-  cloud:
-    consul:
-      host: localhost
-      port: 8500
-    loadbalancer:
-      ribbon:
-        enabled: false
-
-server:
-  port: 0
+  datasource:
+    password: passwordHEPCARDapp
+    url: jdbc:postgresql://localhost:5432/account
+    username: hepcardApp
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  profiles:
+    active: dev
+#spring:
+#  application:
+#    name: account
+#  cloud:
+#    consul:
+#      host: consul
+#      port: 8500
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+#
+#server:
+#  port: 8080
+#
+#---
+#
+#spring:
+#  profiles:
+#    active: dev
+#    datasource:
+#      password: passwordHEPCARDapp
+#      url: jdbc:postgresql://postgres:5432/account
+#      username: hepcardApp
+#      driver-class-name: org.postgresql.Driver
+#      jpa:
+#        hibernate:
+##          ddl-auto: update
+#          ddl-auto: create
+#        properties:
+#          hibernate:
+#            dialect: org.hibernate.dialect.PostgreSQLDialect
+#            format_sql: true
+#        show-sql: true
+#  cloud:
+#    consul:
+#      host: localhost
+#      port: 8500
+#    loadbalancer:
+#      ribbon:
+#        enabled: false
+#
+#server:
+#  port: 0

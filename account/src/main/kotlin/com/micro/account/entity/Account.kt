@@ -11,10 +11,15 @@ data class Account (
 /* By default, properties of a data class are declared as val (read-only)
 which means that they are immutable. However, you can still declare a var property in a data class if you need to.*/
   @Id
-  @GeneratedValue
+  @SequenceGenerator(
+    name = "account_id_sequence",
+    sequenceName = "account_id_sequence"
+  )
+  @GeneratedValue(
+    strategy = GenerationType.SEQUENCE,
+    generator = "account_id_sequence"
+  )
   var id: UUID? = null,
- /* @GeneratedValue(strategy = GenerationType.IDENTITY)
-  var id: Long? = 0,*/
 
   @Column(name = "account_number", nullable = true)
   var accountNumber: String,

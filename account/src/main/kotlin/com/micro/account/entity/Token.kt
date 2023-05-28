@@ -8,14 +8,15 @@ import javax.persistence.*
 
 data class Token(
     @Id
-    @GeneratedValue
+    @SequenceGenerator(
+        name = "token_id_sequence",
+        sequenceName = "token_id_sequence"
+    )
+    @GeneratedValue(
+        strategy = GenerationType.SEQUENCE,
+        generator = "token_id_sequence"
+    )
     var id: UUID? = null,
-
-/*    @Column(name = "user_number", nullable = false ,  unique = true)
-    val userNumber: String,
-
-    @Column(name = "user_email", nullable = false,  unique = true)
-    val userEmail: String,*/
 
     @Column(name = "access_token", nullable = false,  unique = true)
     var accessToken: String,

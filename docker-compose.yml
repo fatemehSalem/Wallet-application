@@ -1,12 +1,12 @@
 version: "3.8"
 services:
-    consul:
-        image: consul
-        ports:
-            - "8500:8500"
-            - "8600:8600/udp"
-        container_name: consul
-        command: ["agent", "-server", "-ui", "-node=server-1", "-bootstrap-expect=1", "-client=0.0.0.0"]
+#    consul:
+#        image: consul
+#        ports:
+#            - "8500:8500"
+#            - "8600:8600/udp"
+#        container_name: consul
+#        command: ["agent", "-server", "-ui", "-node=server-1", "-bootstrap-expect=1", "-client=0.0.0.0"]
 #
 #    config:
 #        build: ./config
@@ -60,19 +60,19 @@ services:
 ##            - .env.stage
 ##            - .env.production
 #
-    account:
-        build: ./account
-        ports:
-            - "8080"
-        container_name: account-service
-        restart: on-failure
-        depends_on:
-            - consul
-            - postgres
-        env_file:
-            - .env.development
-            - .env.stage
-            - .env.production
+#    account:
+#        build: ./account
+#        ports:
+#            - "8080"
+#        container_name: account-service
+#        restart: on-failure
+#        depends_on:
+#            - consul
+#            - postgres
+#        env_file:
+#            - .env.development
+#            - .env.stage
+#            - .env.production
 #
 #    otp:
 #        build: ./otp
