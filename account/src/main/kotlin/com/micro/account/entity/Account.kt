@@ -11,59 +11,53 @@ data class Account (
 /* By default, properties of a data class are declared as val (read-only)
 which means that they are immutable. However, you can still declare a var property in a data class if you need to.*/
   @Id
-  @SequenceGenerator(
-    name = "account_id_sequence",
-    sequenceName = "account_id_sequence"
-  )
-  @GeneratedValue(
-    strategy = GenerationType.SEQUENCE,
-    generator = "account_id_sequence"
-  )
-  var id: UUID? = null,
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  val id: Int,
 
-  @Column(name = "account_number", nullable = true)
+
+  @Column(name = "account_number")
   var accountNumber: String,
 
-  @Column(name = "password", nullable = false)
+  @Column(name = "password")
   var password: String,
 
-  @Column(name = "currency_code", nullable = false)
+  @Column(name = "currency_code")
   var currencyCode: String,
 
-  @Column(name = "alias", nullable = true)
+  @Column(name = "alias")
   var alias: String,
 
-  @Column(name = "user_number", nullable = true ,  unique = true)
+  @Column(name = "user_number")
   var userNumber: String,
 
-  @Column(name = "user_first_name", nullable = false)
+  @Column(name = "user_first_name")
   var userFirstName: String,
 
-  @Column(name = "user_last_name", nullable = false)
+  @Column(name = "user_last_name")
   var userLastName: String,
 
-  @Column(name = "user_phone_country_code", nullable = false)
+  @Column(name = "user_phone_country_code")
   var userPhoneCountryCode: String,
 
-  @Column(name = "user_phone_number", nullable = false , unique = true)
+  @Column(name = "user_phone_number")
   var userPhoneNumber: String,
 
-  @Column(name = "user_email", nullable = true,  unique = true)
+  @Column(name = "user_email")
   var userEmail: String,
 
-  @Column(name = "address_line1", nullable = true)
+  @Column(name = "address_line1")
   var addressLine1: String,
 
-  @Column(name = "address_line2", nullable = true)
+  @Column(name = "address_line2")
   var addressLine2: String,
 
-  @Column(name = "zip_postal_code", nullable = true)
+  @Column(name = "zip_postal_code")
   var zipPostalCode: String,
 
-  @Column(name = "state_province_code", nullable = true)
+  @Column(name = "state_province_code")
   var stateProvinceCode: String
 ){
-  constructor() : this(null, "", "", "",
+  constructor() : this(0, "", "", "",
   "","","","","","","",
             "","" ,"","")
 }

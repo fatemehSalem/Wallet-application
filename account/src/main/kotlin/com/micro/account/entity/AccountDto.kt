@@ -22,11 +22,4 @@ data class AccountDto (
 
     var userEmail: String,
 
-    var addressLine1: String,
-
-    var addressLine2: String,
-
-    var zipPostalCode: String,
-
-    var stateProvinceCode: String
 )

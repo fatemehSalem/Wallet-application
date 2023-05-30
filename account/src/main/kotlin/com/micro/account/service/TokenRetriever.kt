@@ -1,36 +1,56 @@
 package com.micro.account.service
 
 
-import com.micro.account.entity.Token
 import com.micro.account.entity.TokenResponse
 import com.micro.account.repository.TokenRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.RestTemplate
 
 @Service
-class TokenRetriever(private val webClient: WebClient) {
+class TokenRetriever() {
     @Autowired
     private lateinit var tokenRepository: TokenRepository
-    fun retrieveToken(phoneNumber: String) {
+
+
+    fun retrieveToken(): String {
         val client_id = "EE85AF95-EBD3-4D29-800C-3E8BE9340EBD"
         val client_secret = "D44C41B4-E71F-425F-BBCA-99585DC331DB"
-        val requestBody = "grant_type=client_credentials&client_id=$client_id&client_secret=$client_secret"
+        val tokenEndpoint = "https://idsuat.walletgate.io/connect/token"
 
-        val tokenResponse: TokenResponse? = webClient.post()
-            .uri("https://idsuat.walletgate.io/connect/token")
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .bodyValue(requestBody)
-            .retrieve()
-            .bodyToMono(TokenResponse::class.java)
-            .block()
-        if (tokenResponse != null) {
-                val token = Token()
-                token.accessToken = tokenResponse.access_token
-                token.userPhoneNumber = phoneNumber
-                tokenRepository.save(token)
-               // return tokenResponse.access_token
-        }
-      //  return tokenResponse?.access_token ?: throw IllegalStateException("Token retrieval failed")
+        // Prepare the request body
+        val requestBody = LinkedMultiValueMap<String, String>()
+        requestBody.add("grant_type", "client_credentials")
+        requestBody.add("client_id", client_id)
+        requestBody.add("client_secret", client_secret)
+
+        // Prepare the request headers
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+
+        // Create the HTTP entity with request body and headers
+        val requestEntity = HttpEntity(requestBody, headers)
+
+        // Create a RestTemplate instance
+        val restTemplate = RestTemplate()
+
+        // Send the POST request to the token endpoint
+        val responseEntity = restTemplate.exchange(
+            tokenEndpoint,
+            HttpMethod.POST,
+            requestEntity,
+            TokenResponse::class.java
+        )
+
+        // Retrieve the response body
+        val tokenResponse = responseEntity.body
+
+        return tokenResponse?.access_token ?: throw IllegalStateException("Token retrieval failed")
     }
+
 }

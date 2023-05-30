@@ -1,6 +1,6 @@
 package com.micro.account.config
-
-/*import com.micro.account.entity.LoginResponse
+/*
+import com.micro.account.entity.LoginResponse
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -11,9 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
-import org.springframework.web.client.RestTemplate*/
+import org.springframework.web.client.RestTemplate
 
-/*@Service
+@Service
 class AccountAuthProvider : AuthenticationProvider {
     private val restTemplate = RestTemplate()
 
