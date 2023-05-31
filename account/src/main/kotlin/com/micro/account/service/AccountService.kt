@@ -2,8 +2,7 @@ package com.micro.account.service
 
 import com.micro.account.entity.*
 import com.micro.account.repository.AccountRepository
-import com.micro.account.utils.PasswordUtils.encryptPassword
-import com.micro.account.utils.PasswordUtils.verifyPassword
+import com.micro.account.repository.OTPRepository
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
@@ -15,6 +14,7 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val tokenRetriever: TokenRetriever,
     private val tokenService: TokenService,
+    private val otpRepository: OTPRepository,
 
 ) {
     val accountMap: HashMap<String, AccountDto> = HashMap()
@@ -48,9 +48,6 @@ class AccountService(
     fun createNewAccount( otpCheck: OTPCheck): ResponseEntity<String> {
         val accountDto = accountMap["123"]
         if (accountDto != null) {
-
-            var accessToken = tokenRetriever.retrieveToken()
-
             val contactAddress = ContactAddress(
                 "",
                 "",
@@ -75,69 +72,58 @@ class AccountService(
                 accountDto.userEmail,
                 contactAddress
             )
-
-            val restTemplate = RestTemplate()
-            val headers = HttpHeaders()
-            headers.set("Authorization", "Bearer $accessToken")
-            headers.contentType = MediaType.APPLICATION_JSON
-
-            val requestEntity = HttpEntity(accountRequest, headers)
-
-            val responseEntity = restTemplate.exchange(
-                "https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount",
-                HttpMethod.POST,
-                requestEntity,
-                AccountResponse::class.java
-            )
-
-            val accountResponse = responseEntity.body
-            if (accountResponse != null) {
-                val account = Account()
-                account.accountNumber = accountRequest?.account_number ?: ""
-                account.currencyCode = accountRequest.currency_code
-                account.alias = accountRequest?.alias ?: ""
-                account.userNumber = accountRequest?.user_number ?: ""
-                account.userFirstName = accountRequest.user_first_name
-                account.userLastName = accountRequest.user_last_name
-                account.userPhoneCountryCode = accountRequest.user_phone_country_code
-                account.userPhoneNumber = accountRequest.user_phone_number
-                account.userEmail = accountRequest?.user_email ?: ""
-                account.addressLine1 = accountRequest?.contact_address.address_line1 ?: ""
-                account.addressLine2 = accountRequest?.contact_address.address_line2 ?: ""
-                account.zipPostalCode = accountRequest?.contact_address.zip_postal_code ?: ""
-                account.stateProvinceCode = accountRequest?.contact_address.state_province_code ?: ""
-                account.password = accountDto.password
-                accountRepository.save(account)
-
+            val account = Account()
+            account.accountNumber = accountRequest?.account_number ?: ""
+            account.currencyCode = accountRequest.currency_code
+            account.alias = accountRequest?.alias ?: ""
+            account.userNumber = accountRequest?.user_number ?: ""
+            account.userFirstName = accountRequest.user_first_name
+            account.userLastName = accountRequest.user_last_name
+            account.userPhoneCountryCode = accountRequest.user_phone_country_code
+            account.userPhoneNumber = accountRequest.user_phone_number
+            account.userEmail = accountRequest?.user_email ?: ""
+            account.addressLine1 = accountRequest?.contact_address.address_line1 ?: ""
+            account.addressLine2 = accountRequest?.contact_address.address_line2 ?: ""
+            account.zipPostalCode = accountRequest?.contact_address.zip_postal_code ?: ""
+            account.stateProvinceCode = accountRequest?.contact_address.state_province_code ?: ""
+            account.password = accountDto.password
+            accountRepository.save(account)
+            try {
+                callAccountRegister(accountRequest)
+            }catch (e:Exception){
+                return ResponseEntity("Something wrong", HttpStatus.UNAUTHORIZED)
             }
-            // account.password = encryptPassword(accountDto.password)
-
-
-            /*   fun createNewAccount(token: String) {*/
-            /*     val requestBody = AccountRequest
-
-         webClient.post()
-             .uri("https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount")
-             .header("Authorization", "Bearer $token")
-             .bodyValue(requestBody)
-             .retrieve()
-             .bodyToMono(String::class.java)
-             .block()
-     }*/
         }
         return ResponseEntity("create Account success", HttpStatus.OK)
     }
 
+    fun callAccountRegister(accountRequest: AccountRequestToSave): Payload {
+        var accessToken = tokenRetriever.retrieveToken()
+        val restTemplate = RestTemplate()
+        val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount"
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+        val requestBody =  HttpEntity(accountRequest, headers)
 
+        val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, AccountResponse::class.java)
+
+        val payload = response.body?.payload
+
+        return payload ?: throw IllegalStateException("Payload not found in the response.")
+    }
     fun authenticate(phoneNumberOrEmail: String , password:String): Boolean {
         var retVal = false
-/*        val map: HashMap<String, Boolean> = HashMap()*/
         try {
             var  user = accountRepository.findByUserPhoneNumber(phoneNumberOrEmail)
             if(user!=null){
                 if(user.userPhoneNumber == phoneNumberOrEmail){
                     if(user.password == password){
                         retVal = true
+                        val code = splitLastFourDigits(phoneNumberOrEmail)
+                        var otp = OTP()
+                        otp.userPhoneNumber = phoneNumberOrEmail
+                        otp.userOtpCode = code
+                        otpRepository.save(otp)
                     }
                 }
             }
@@ -168,6 +154,32 @@ class AccountService(
 //            .bodyToMono(String::class.java)
 //    }
 
+     fun verifyOTP(otpCheck: String):ResponseEntity<String>{
+         var otp = otpRepository.findByUserOtpCode(otpCheck)
+         if(otp != null){
+             if(otp.userOtpCode == otpCheck){
+                 return ResponseEntity("OTP verification was successful", HttpStatus.OK)
+             }
+         }
+         return ResponseEntity("OTP code is Wrong", HttpStatus.UNAUTHORIZED)
+     }
+
+    fun getAccountInfo(userPhoneNumber: String):ResponseEntity<Any>{
+        var account = accountRepository.findByUserPhoneNumber(userPhoneNumber)
+        if(account!= null){
+            var accessToken = tokenRetriever.retrieveToken()
+            val restTemplate = RestTemplate()
+            val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/GetPersonalAccount"
+            val headers = HttpHeaders()
+            headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+            val requestBody =  HttpEntity(GetAccountInfoRequest(account.accountNumber), headers)
+
+            val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GetAccountInfoResponse::class.java)
+            val payload = response.body?.payload
+            return  ResponseEntity(payload?: "payload is null", HttpStatus.OK)
+        }
+        return  ResponseEntity("Account is not found", HttpStatus.UNAUTHORIZED)
+    }
 
 
 }

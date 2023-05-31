@@ -25,13 +25,14 @@ class AccountController {
     fun login(@RequestBody loginRequest: LoginRequest):ResponseEntity<String>{
         if (accountService.authenticate(loginRequest.phoneNumber ,loginRequest.password )) {
             accountService.generateOtp(loginRequest.phoneNumber)
+
            return ResponseEntity("Authenticate was successful", HttpStatus.OK)
         }
         return ResponseEntity("Authentication failed", HttpStatus.UNAUTHORIZED)
     }
     @PostMapping("/verifyOTP")
     fun login(@RequestBody otpCheck: OTPCheck):ResponseEntity<String>{
-        return ResponseEntity("OTP check was successful", HttpStatus.OK)
+       return accountService.verifyOTP(otpCheck.code)
     }
 /*    @PostMapping("/login")
     @ApiOperation("Get Login Request")
@@ -72,20 +73,6 @@ class AccountController {
 
 
     }
-/*
-    @PostMapping("/createNewAccountAfterOTP")
-    {
-         val accountResponse =
-                tokenService.findByUserPhoneNumber(accountRequest.user_phone_number)?.accessToken?.let {
-                    accountService.createNewAccount(
-                        it,
-                        accountRequest
-                    )
-                }
-            // return accountResponseMono.map { accountResponse ->
-            return ResponseEntity.status(HttpStatus.OK).body(accountResponse)
-    }
-*/
 
     @GetMapping("/findByUserPhoneNumber/{phoneNumber}")
         fun findByUserPhoneNumber(@PathVariable phoneNumber: String): LoginRequest? {
@@ -95,6 +82,11 @@ class AccountController {
              loginRequest = LoginRequest(account.password, account.userPhoneNumber)
         }
         return loginRequest
+    }
+
+    @GetMapping("/getAccountInfo/{phoneNumber}")
+    fun getAccountInfo(@PathVariable phoneNumber: String): ResponseEntity<Any>{
+        return  accountService.getAccountInfo(phoneNumber)
     }
 
 }
