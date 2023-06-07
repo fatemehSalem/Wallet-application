@@ -9,11 +9,9 @@ object PasswordUtils {
         return passwordEncoder.encode(password)
     }
 
-    fun decryptPassword(encryptedPassword: String): String {
-        throw UnsupportedOperationException("BCrypt passwords cannot be decrypted")
-    }
-
     fun verifyPassword(password: String, encryptedPassword: String): Boolean {
         return passwordEncoder.matches(password, encryptedPassword)
     }
+
+
 }

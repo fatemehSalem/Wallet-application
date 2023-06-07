@@ -2,6 +2,7 @@ package com.micro.account.controller
 
 import com.micro.account.entity.*
 import com.micro.account.service.AccountService
+import com.micro.account.utils.GeneralUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,25 +16,32 @@ class AccountController {
     @Autowired
     private lateinit var accountService: AccountService
 
-
-
     @GetMapping("/testAccountService/{num}")
     fun test(@PathVariable num: String):String{
         return "testAccountService is ran!!"
     }
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest):ResponseEntity<String>{
+    fun login(@RequestBody loginRequest: LoginRequest):ResponseEntity<CustomResponse<Any>>{
         if (accountService.authenticate(loginRequest.phoneNumber ,loginRequest.password )) {
             accountService.generateOtp(loginRequest.phoneNumber)
-
-           return ResponseEntity("Authenticate was successful", HttpStatus.OK)
+            return ResponseEntity.status(HttpStatus.OK).
+            body(
+                GeneralUtils.createCustomResponse(
+                    "",
+                    "Account Authentication was Successful", "200"
+                )
+            )
         }
-        return ResponseEntity("Authentication failed", HttpStatus.UNAUTHORIZED)
+        val errorCode = ErrorCode.ACCOUNT_AUTHENTICATION_WAS_UNSUCCESSFUL
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            GeneralUtils.createCustomResponse(
+                "",
+                "Account Authentication was unsuccessful", errorCode.code
+            )
+        )
+      //  return ResponseEntity("Authentication failed", HttpStatus.UNAUTHORIZED)
     }
-    @PostMapping("/verifyOTP")
-    fun login(@RequestBody otpCheck: OTPCheck):ResponseEntity<String>{
-       return accountService.verifyOTP(otpCheck.code)
-    }
+
 /*    @PostMapping("/login")
     @ApiOperation("Get Login Request")
     fun login(@RequestBody loginRequest: LoginRequest) {
@@ -59,19 +67,21 @@ class AccountController {
 
     @PostMapping("/createNewAccountBeforeOTP")
 //    @ApiOperation("Create New Account")
-  fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest): ResponseEntity<String>{
+  fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest): ResponseEntity<CustomResponse<Any>> {
             //1_Account info stored in Memory and OTP code generated
            return accountService.createNewAccountInMemory(accountRequest)
             // }
-
     }
 
     @PostMapping("/createNewAccountAfterOTP")
-    fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<String>{
+    fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<CustomResponse<Any>>{
        return  accountService.createNewAccount(otpCheck)
         // return accountResponseMono.map { accountResponse ->
+    }
 
-
+    @PostMapping("/verifyOTP")
+    fun login(@RequestBody otpCheck: OTPCheck):ResponseEntity<CustomResponse<Any>>{
+        return accountService.verifyOTP(otpCheck)
     }
 
     @GetMapping("/findByUserPhoneNumber/{phoneNumber}")
@@ -85,7 +95,7 @@ class AccountController {
     }
 
     @GetMapping("/getAccountInfo/{phoneNumber}")
-    fun getAccountInfo(@PathVariable phoneNumber: String): ResponseEntity<Any>{
+    fun getAccountInfo(@PathVariable phoneNumber: String): ResponseEntity<CustomResponse<Any>>{
         return  accountService.getAccountInfo(phoneNumber)
     }
 

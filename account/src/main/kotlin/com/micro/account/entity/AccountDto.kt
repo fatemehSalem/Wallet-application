@@ -22,4 +22,6 @@ data class AccountDto (
 
     var userEmail: String,
 
+    var otpCode: String
+
 )
