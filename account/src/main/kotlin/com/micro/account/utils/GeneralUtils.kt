@@ -23,13 +23,13 @@ object GeneralUtils {
             phoneNumber
         }
     }
-
-    fun createCustomResponse(data: Any, message: String, status: Any): CustomResponse<Any> {
+/*
+    fun createCustomResponse(data: Any, message: String, status: Int): CustomResponse<Any> {
         val data = data
         val message = message
         val status = status
         return CustomResponse(data, message, status)
-    }
+    }*/
 
  /*   fun createErrorResponse(errorCode:ErrorCode , errorMessage:String): ErrorResponse {
         val errorCode = ErrorCode.INVALID_PHONE_NUMBER

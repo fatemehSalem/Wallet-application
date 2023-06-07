@@ -4,5 +4,5 @@ data class CustomResponse<Any>(
     //val data: T?,
     val data: Any,
     val message: String,
-    val status: Any
+    val errorCode: Int? = null
 )
