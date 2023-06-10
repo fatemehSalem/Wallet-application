@@ -8,11 +8,9 @@ import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.GetAccountInfoRequest
 import com.micro.account.entity.response.AccountResponse
 import com.micro.account.entity.response.CustomResponse
-import com.micro.account.entity.response.OTPResponse
 import com.micro.account.repository.AccountRepository
 import com.micro.account.repository.OTPRepository
 import com.micro.account.utils.GeneralUtils.splitLastFourDigits
-import com.micro.account.utils.GeneralUtils.generateRandomString
 import com.micro.account.utils.PasswordEncoderUtils
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -34,7 +32,7 @@ class AccountService(
 
     fun createNewAccountInMemory(accountRequest: AccountRequest): ResponseEntity<Any>  {
         val accountDto = AccountDto(
-            generateRandomString(),
+            "",
             accountRequest.password,
             "TRY",
             "",
@@ -61,6 +59,7 @@ class AccountService(
                     "create Account was unsuccessful: OTP code or Phone number is invalid", errorCode.code)
                 return ResponseEntity.ok(response)
             } else{
+                try {
                     val contactAddress = ContactAddress(
                         "",
                         "",
@@ -85,8 +84,10 @@ class AccountService(
                         accountDto.userEmail,
                         contactAddress
                     )
-
-                    account.accountNumber = accountRequest.account_number
+                    val payload = callAccountRegister(accountRequest)
+                   // account.accountNumber = accountRequest.account_number
+                    account.accountNumber = payload.account_number.toString()
+                    account.walletNumber = payload.wallet_number.toString()
                     account.currencyCode = accountRequest.currency_code
                     account.alias = accountRequest.alias
                     account.userNumber = accountRequest.user_number
@@ -101,16 +102,13 @@ class AccountService(
                     account.stateProvinceCode = accountRequest.contact_address.state_province_code
                     account.password = PasswordEncoderUtils.encryptPassword(accountDto.password)
                     accountRepository.save(account)
-                    try {
-                        callAccountRegister(accountRequest)
-                    }catch (e:Exception){
-                        val errorCode = ErrorCode.CREATE_ACCOUNT_WAS_UNSUCCESSFUL
-                        /* val errorMessage = "CREATE ACCOUNT WAS UNSUCCESSFUL"
-                         val errorResponse = ErrorResponse(errorCode, errorMessage)*/
-                        val response = CustomResponse("", "create Account was unsuccessful", errorCode.code)
-                        return ResponseEntity.ok(response)
-                    }
-
+                }catch (e:Exception){
+                    val errorCode = ErrorCode.CREATE_ACCOUNT_WAS_UNSUCCESSFUL
+                    /* val errorMessage = "CREATE ACCOUNT WAS UNSUCCESSFUL"
+                     val errorResponse = ErrorResponse(errorCode, errorMessage)*/
+                    val response = CustomResponse("", "create Account was unsuccessful", errorCode.code)
+                    return ResponseEntity.ok(response)
+                }
             }
 
             val response = CustomResponse(account, "create Account was Successful")
@@ -161,8 +159,7 @@ class AccountService(
     }
 
     fun generateOtp(phoneNumber: String): ResponseEntity<Any> {
-        val response = CustomResponse(
-            OTPResponse(splitLastFourDigits(phoneNumber)),
+        val response = CustomResponse("",
             "OTP code is generated successfully")
         return ResponseEntity.ok(response)
     }

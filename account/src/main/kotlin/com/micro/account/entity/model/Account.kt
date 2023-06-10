@@ -18,6 +18,9 @@ which means that they are immutable. However, you can still declare a var proper
   @Column(name = "account_number")
   var accountNumber: String,
 
+  @Column(name = "wallet_number")
+  var walletNumber: String,
+
   @Column(name = "password")
   var password: String,
 
@@ -58,6 +61,7 @@ which means that they are immutable. However, you can still declare a var proper
   var stateProvinceCode: String
 ){
   constructor() : this(0, "", "", "",
-  "","","","","","","",
-            "","" ,"","")
+            "","","","","",
+     "","",
+              "","" ,"","","")
 }
