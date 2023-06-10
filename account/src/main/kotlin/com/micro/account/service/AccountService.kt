@@ -8,6 +8,7 @@ import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.GetAccountInfoRequest
 import com.micro.account.entity.response.AccountResponse
 import com.micro.account.entity.response.CustomResponse
+import com.micro.account.mapper.AccountMapper
 import com.micro.account.repository.AccountRepository
 import com.micro.account.repository.OTPRepository
 import com.micro.account.utils.GeneralUtils.splitLastFourDigits
@@ -31,22 +32,30 @@ class AccountService(
     }
 
     fun createNewAccountInMemory(accountRequest: AccountRequest): ResponseEntity<Any>  {
-        val accountDto = AccountDto(
-            "",
-            accountRequest.password,
-            "TRY",
-            "",
-            "",
-            accountRequest.user_first_name,
-            accountRequest.user_last_name,
-            accountRequest.user_phone_country_code,
-            accountRequest.user_phone_number,
-            accountRequest.user_email,
-            splitLastFourDigits(accountRequest.user_phone_number)
-        )
-        accountMap["123"] = accountDto
+      /*  if(accountRepository.findByUserPhoneNumber(accountRequest.user_phone_number)!= null) {
+            val errorCode = ErrorCode.ACCOUNT_EXIST_WITH_THIS_PHONE_NUMBER
+            val response = CustomResponse(null,
+                    "register Account was unsuccessful: account exist with this user phone number",
+                    errorCode.code)
+            return ResponseEntity.ok(response)
+        } else{*/
+            val accountDto = AccountDto(
+                    "",
+                    accountRequest.password,
+                    "TRY",
+                    "",
+                    "",
+                    accountRequest.user_first_name,
+                    accountRequest.user_last_name,
+                    accountRequest.user_phone_country_code,
+                    accountRequest.user_phone_number,
+                    accountRequest.user_email,
+                    splitLastFourDigits(accountRequest.user_phone_number)
+            )
+            accountMap["123"] = accountDto
 
-         return generateOtp(accountRequest.user_phone_number)
+            return generateOtp(accountRequest.user_phone_number)
+        //}
     }
 
     fun createNewAccount(otpCheck: OTPCheck):  ResponseEntity<Any> {
@@ -55,8 +64,9 @@ class AccountService(
         if(accountDto != null ){
             if( accountDto.otpCode!=otpCheck.code || accountDto.userPhoneNumber!=otpCheck.phoneNumber ){
                 val errorCode = ErrorCode.INVALID_OTP_CODE
-                val response = CustomResponse("",
-                    "create Account was unsuccessful: OTP code or Phone number is invalid", errorCode.code)
+                val response = CustomResponse(null,
+                    "create Account was unsuccessful: OTP code or Phone number is invalid",
+                        errorCode.code)
                 return ResponseEntity.ok(response)
             } else{
                 try {
@@ -85,7 +95,6 @@ class AccountService(
                         contactAddress
                     )
                     val payload = callAccountRegister(accountRequest)
-                   // account.accountNumber = accountRequest.account_number
                     account.accountNumber = payload.account_number.toString()
                     account.walletNumber = payload.wallet_number.toString()
                     account.currencyCode = accountRequest.currency_code
@@ -104,14 +113,11 @@ class AccountService(
                     accountRepository.save(account)
                 }catch (e:Exception){
                     val errorCode = ErrorCode.CREATE_ACCOUNT_WAS_UNSUCCESSFUL
-                    /* val errorMessage = "CREATE ACCOUNT WAS UNSUCCESSFUL"
-                     val errorResponse = ErrorResponse(errorCode, errorMessage)*/
-                    val response = CustomResponse("", "create Account was unsuccessful", errorCode.code)
+                    val response = CustomResponse(null, "create Account was unsuccessful", errorCode.code)
                     return ResponseEntity.ok(response)
                 }
             }
-
-            val response = CustomResponse(account, "create Account was Successful")
+            val response = CustomResponse(AccountMapper.mapAccountToAccountResponse(account), "create Account was Successful")
             return ResponseEntity.ok(response)
         }
         val response = CustomResponse("", "create Account was unsuccessful: Something Is Wrong",401)
@@ -140,7 +146,6 @@ class AccountService(
             val user = accountRepository.findByUserPhoneNumber(userPhoneNumber)
             if(user!=null){
                 if(user.userPhoneNumber == userPhoneNumber){
-                 //  if(user.password == password)
                 if(PasswordEncoderUtils.verifyPassword(password,user.password))
                     {
                         retVal = true
@@ -159,7 +164,7 @@ class AccountService(
     }
 
     fun generateOtp(phoneNumber: String): ResponseEntity<Any> {
-        val response = CustomResponse("",
+        val response = CustomResponse(null,
             "OTP code is generated successfully")
         return ResponseEntity.ok(response)
     }
@@ -169,12 +174,12 @@ class AccountService(
          val otp = otpRepository.findByUserPhoneNumber(otpCheck.phoneNumber)
          if(otp != null){
              if(otp.userOtpCode == otpCheck.code && otp.userPhoneNumber == otpCheck.phoneNumber){
-                 val response = CustomResponse("", "Account OTP verification was Successful")
+                 val response = CustomResponse(null, "Account OTP verification was Successful")
                  return ResponseEntity.ok(response)
              }
          }
          val errorCode = ErrorCode.INVALID_OTP_CODE
-         val response = CustomResponse("",
+         val response = CustomResponse(null,
              "Account OTP verification was unsuccessful: OTP code or Phone number is invalid",errorCode.code)
          return ResponseEntity.ok(response)
      }
@@ -200,7 +205,7 @@ class AccountService(
             return ResponseEntity.ok(response2)
         }
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
-        val response3 = CustomResponse("",
+        val response3 = CustomResponse(null,
             "Get Account Info was not successful: Account is not found!",errorCode.code)
         return ResponseEntity.ok(response3)
     }
@@ -214,7 +219,7 @@ class AccountService(
             return ResponseEntity.ok(response)
         }
         val errorCode = ErrorCode.ACCOUNT_CHANGE_PASSWORD_WAS_UNSUCCESSFUL
-        val response = CustomResponse("",
+        val response = CustomResponse(null,
             "Change Account Password was not successful: Account is not found!",errorCode.code)
         return ResponseEntity.ok(response)
     }

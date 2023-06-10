@@ -27,11 +27,11 @@ class AccountController {
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
         if (accountService.authenticate(loginRequest.phoneNumber ,loginRequest.password )) {
             accountService.generateOtp(loginRequest.phoneNumber)
-            val response = CustomResponse("",  "Account Authentication was Successful")
+            val response = CustomResponse(null,  "Account Authentication was Successful")
             return ResponseEntity.ok(response)
         }
         val errorCode = ErrorCode.ACCOUNT_AUTHENTICATION_WAS_UNSUCCESSFUL
-        val response = CustomResponse("",  "Account Authentication was unsuccessful",errorCode.code)
+        val response = CustomResponse(null,  "Account Authentication was unsuccessful",errorCode.code)
         return ResponseEntity.ok(response)
        /* return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
           *//*  GeneralUtils.createCustomResponse(
@@ -65,7 +65,7 @@ class AccountController {
 //        return accountService.generateOtp(request)
 //    }
 
-    @PostMapping("/createNewAccountBeforeOTP")
+    @PostMapping("/register")
 //    @ApiOperation("Create New Account")
   fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest): ResponseEntity<Any>  {
             //1_Account info stored in Memory and OTP code generated
@@ -73,12 +73,12 @@ class AccountController {
             // }
     }
 
-    @PostMapping("/createNewAccountAfterOTP")
+    @PostMapping("/signup")
     fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any>{
     return  accountService.createNewAccount(otpCheck)
     }
 
-    @PostMapping("/verifyOTP")
+    @PostMapping("/authenticate")
     fun login(@RequestBody otpCheck: OTPCheck):ResponseEntity<Any> {
         return accountService.verifyOTP(otpCheck)
     }
@@ -98,7 +98,7 @@ class AccountController {
         return  accountService.getAccountInfo(phoneNumber)
     }
 
-    @PostMapping("/ChangeAccountPassword")
+    @PostMapping("/changePassword")
     fun changeAccountPassword(@RequestBody request: ChangeAccountPasswordRequest): ResponseEntity<Any>{
         return accountService.changeAccountPassword(request)
     }
