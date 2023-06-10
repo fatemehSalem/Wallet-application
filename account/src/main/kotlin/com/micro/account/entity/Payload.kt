@@ -1,5 +1,7 @@
 package com.micro.account.entity
 
+import com.micro.account.entity.UserKycInfo
+
 data class Payload(
     val user_number: String?,
     val wallet_number: String?,

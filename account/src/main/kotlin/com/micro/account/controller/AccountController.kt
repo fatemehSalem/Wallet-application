@@ -1,10 +1,13 @@
 package com.micro.account.controller
 
-import com.micro.account.entity.*
+import com.micro.account.entity.ErrorCode
+import com.micro.account.entity.OTPCheck
+import com.micro.account.entity.request.AccountRequest
+import com.micro.account.entity.request.ChangeAccountPasswordRequest
+import com.micro.account.entity.request.LoginRequest
+import com.micro.account.entity.response.CustomResponse
 import com.micro.account.service.AccountService
-import com.micro.account.utils.GeneralUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -26,13 +29,6 @@ class AccountController {
             accountService.generateOtp(loginRequest.phoneNumber)
             val response = CustomResponse("",  "Account Authentication was Successful")
             return ResponseEntity.ok(response)
-           /* return ResponseEntity.status(HttpStatus.OK).
-            body(
-                GeneralUtils.createCustomResponse(
-                    "",
-                    "Account Authentication was Successful"
-                )
-            )*/
         }
         val errorCode = ErrorCode.ACCOUNT_AUTHENTICATION_WAS_UNSUCCESSFUL
         val response = CustomResponse("",  "Account Authentication was unsuccessful",errorCode.code)
@@ -80,7 +76,6 @@ class AccountController {
     @PostMapping("/createNewAccountAfterOTP")
     fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any>{
     return  accountService.createNewAccount(otpCheck)
-        // return accountResponseMono.map { accountResponse ->
     }
 
     @PostMapping("/verifyOTP")
@@ -101,6 +96,11 @@ class AccountController {
     @GetMapping("/getAccountInfo/{phoneNumber}")
     fun getAccountInfo(@PathVariable phoneNumber: String): ResponseEntity<Any> {
         return  accountService.getAccountInfo(phoneNumber)
+    }
+
+    @PostMapping("/ChangeAccountPassword")
+    fun changeAccountPassword(@RequestBody request: ChangeAccountPasswordRequest): ResponseEntity<Any>{
+        return accountService.changeAccountPassword(request)
     }
 
 }

@@ -1,8 +1,8 @@
 package com.micro.account.service
 
 
-import com.micro.account.entity.TokenResponse
-import com.micro.account.repository.TokenRepository
+import com.micro.account.entity.response.TokenResponse
+import com.micro.account.repository.AccessTokenRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate
 @Service
 class TokenRetriever() {
     @Autowired
-    private lateinit var tokenRepository: TokenRepository
+    private lateinit var tokenRepository: AccessTokenRepository
 
 
     fun retrieveToken(): String {

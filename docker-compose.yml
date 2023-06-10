@@ -71,8 +71,8 @@
 #            - postgres
 #        env_file:
 #            - .env.development
-##            - .env.stage
-##            - .env.production
+#            - .env.stage
+#            - .env.production
 ##
 ##    otp:
 ##        build: ./otp
@@ -134,5 +134,5 @@
 #volumes:
 #    postgres:
 #    pgadmin:
-#
-##pgAdminPasswprd: HepC@rd@123321@
+
+#pgAdminPasswprd: HepC@rd@123321@

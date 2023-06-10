@@ -1,6 +1,6 @@
 package com.micro.account.config
 /*
-import com.micro.account.entity.LoginResponse
+import com.micro.account.entity.response.LoginResponse
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType

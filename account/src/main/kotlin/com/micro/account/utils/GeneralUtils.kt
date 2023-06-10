@@ -1,9 +1,5 @@
 package com.micro.account.utils
 
-import com.micro.account.entity.Account
-import com.micro.account.entity.CustomResponse
-import com.micro.account.entity.ErrorCode
-import com.micro.account.entity.ErrorResponse
 import kotlin.random.Random
 
 object GeneralUtils {

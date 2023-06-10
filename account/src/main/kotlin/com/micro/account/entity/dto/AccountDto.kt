@@ -1,4 +1,4 @@
-package com.micro.account.entity
+package com.micro.account.entity.dto
 
 data class AccountDto (
 

@@ -1,3 +1,3 @@
-package com.micro.account.entity
+package com.micro.account.entity.response
 
 data class TokenResponse(val access_token: String)

@@ -1,4 +1,5 @@
 package com.micro.account.entity
+
 data class GetAccountInfoResponse(
     val status: Int?,
     val code: String?,

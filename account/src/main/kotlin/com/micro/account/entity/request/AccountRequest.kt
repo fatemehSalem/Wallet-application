@@ -1,4 +1,4 @@
-package com.micro.account.entity
+package com.micro.account.entity.request
 
 data class AccountRequest(
     val user_first_name: String,
