@@ -1,6 +1,5 @@
 package com.micro.account.entity.model
 
-import java.util.*
 import javax.persistence.*
 
 
@@ -14,12 +13,14 @@ which means that they are immutable. However, you can still declare a var proper
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Int,
 
-
   @Column(name = "account_number")
   var accountNumber: String,
 
   @Column(name = "wallet_number")
   var walletNumber: String,
+
+  @Column(name = "wallet_id")
+  var walletId: String,
 
   @Column(name = "password")
   var password: String,
@@ -60,7 +61,7 @@ which means that they are immutable. However, you can still declare a var proper
   @Column(name = "state_province_code")
   var stateProvinceCode: String
 ){
-  constructor() : this(0, "", "", "",
+  constructor() : this(0, "", "", "", "",
             "","","","","",
      "","",
               "","" ,"","","")

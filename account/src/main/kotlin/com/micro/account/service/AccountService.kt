@@ -2,6 +2,7 @@ package com.micro.account.service
 
 import com.micro.account.entity.*
 import com.micro.account.entity.dto.AccountDto
+import com.micro.account.entity.dto.GetAccountInfoResponseDto
 import com.micro.account.entity.model.*
 import com.micro.account.entity.dto.P2PTransferRequestDto
 import com.micro.account.entity.dto.TopUpCreditCardDto
@@ -216,8 +217,28 @@ class AccountService(
             val response =
                 restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GetAccountInfoResponse::class.java)
             val payload = response.body?.payload
-            val response2 = CustomResponse(payload ?: "payload is null", "Get Account Info was successful")
-            return ResponseEntity.ok(response2)
+            if(payload!= null){
+                val requestUrl = "https://stsapiuat.walletgate.io/v1/wallet/info"
+                headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+                val requestBody = HttpEntity(WalletInfoRequest(account.accountNumber , account.walletNumber), headers)
+
+                val response =
+                    restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
+                val payloadSecond = response.body?.payload
+                if(payloadSecond!= null){
+                    val getInfoResponse = GetAccountInfoResponseDto(
+                        account.accountNumber,
+                        payloadSecond?.wallet_info?.user_kyc_info?.first_name.toString(),
+                        payloadSecond?.wallet_info?.user_kyc_info?.last_name.toString(),
+                        payloadSecond?.wallet_info?.transaction_limits?.max_balance,
+                        payloadSecond?.wallet_info?.user_kyc_info?.kyc_level_status.toString()
+                    )
+                    account?.walletId = payloadSecond.wallet_info?.id.toString()
+                    accountRepository.save(account)
+                    val response2 = CustomResponse(getInfoResponse, "Get Account Info was successful")
+                    return ResponseEntity.ok(response2)
+                }
+            }
         }
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
         val response3 = CustomResponse(

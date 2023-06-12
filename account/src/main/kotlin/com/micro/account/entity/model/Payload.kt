@@ -1,6 +1,7 @@
 package com.micro.account.entity.model
 
 import com.micro.account.entity.SenderWalletInfo
+import com.micro.account.entity.TransactionLimits
 import com.micro.account.entity.UserKycInfo
 import com.micro.account.entity.WalletInfo
 import java.math.BigDecimal
@@ -42,7 +43,7 @@ data class Payload(
     val ext_transaction_id: String?,
     val transaction_fee_amount: BigDecimal?,
     val previous_amount: BigDecimal?,
-    val wallet_info: WalletInfo?,
+    val wallet_info: WalletInfo?
 
 
     )

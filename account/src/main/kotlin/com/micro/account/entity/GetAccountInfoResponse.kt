@@ -15,7 +15,8 @@ data class UserKycInfo(
     val birth_year: Int?,
     val kyc_level: Int?,
     val kyc_level_status: String?,
-    val national_id: String?
+    val national_id: String?,
+    val sector_id: Int?
 )
 
 data class SenderWalletInfo(
@@ -80,7 +81,8 @@ data class WalletInfo(
     val access_level_status: String?,
     val payment_balance: PaymentBalance?,
     val cash_balance: CashBalance?,
-    val transaction_limits: TransactionLimits?
+    val transaction_limits: TransactionLimits?,
+    val user_kyc_info: UserKycInfo?
 )
 
 
