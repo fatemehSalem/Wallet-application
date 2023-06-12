@@ -27,7 +27,9 @@ class AccessTokenService(private val accessTokenRepository: AccessTokenRepositor
 
         val currentTime = Instant.now()
         val expirationTime = tokenEntity.expirationTime.minusSeconds(60)
-
+        if(currentTime.isAfter(expirationTime)){
+            accessTokenRepository.delete(tokenEntity)
+        }
         return currentTime.isAfter(expirationTime)
     }
 

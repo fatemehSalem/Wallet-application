@@ -6,15 +6,18 @@ import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.LoginRequest
 import com.micro.account.entity.dto.P2PTransferRequestDto
+import com.micro.account.entity.dto.TopUpCreditCardDto
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.service.AccountService
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/account")
-//@Api(tags = ["Account Controller"])
+//@Api(value = "Account API", description = "My Account Service APIs")
 class AccountController {
 
     @Autowired
@@ -25,6 +28,7 @@ class AccountController {
         return "testAccountService is ran!!"
     }
     @PostMapping("/login")
+//    @ApiOperation("Account login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
         if (accountService.authenticate(loginRequest.phoneNumber ,loginRequest.password )) {
             accountService.generateOtp(loginRequest.phoneNumber)
@@ -67,7 +71,7 @@ class AccountController {
 //    }
 
     @PostMapping("/register")
-//    @ApiOperation("Create New Account")
+//    @ApiOperation("register New Account")
   fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest): ResponseEntity<Any>  {
             //1_Account info stored in Memory and OTP code generated
            return accountService.createNewAccountInMemory(accountRequest)
@@ -75,11 +79,13 @@ class AccountController {
     }
 
     @PostMapping("/signup")
+//    @ApiOperation("Account signup")
     fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any>{
     return  accountService.createNewAccount(otpCheck)
     }
 
     @PostMapping("/authenticate")
+//    @ApiOperation("Account authenticate")
     fun login(@RequestBody otpCheck: OTPCheck):ResponseEntity<Any> {
         return accountService.verifyOTP(otpCheck)
     }
@@ -95,18 +101,26 @@ class AccountController {
     }
 
     @GetMapping("/getAccountInfo/{phoneNumber}")
+//    @ApiOperation("Account get Info")
     fun getAccountInfo(@PathVariable phoneNumber: String): ResponseEntity<Any> {
         return  accountService.getAccountInfo(phoneNumber)
     }
 
     @PostMapping("/changePassword")
+//    @ApiOperation("Account change Password")
     fun changeAccountPassword(@RequestBody request: ChangeAccountPasswordRequest): ResponseEntity<Any>{
         return accountService.changeAccountPassword(request)
     }
 
     @PostMapping("/personalToPersonalTransfer")
+//    @ApiOperation("Personal To Personal Transfer")
     fun personalToPersonalTransfer(@RequestBody request: P2PTransferRequestDto): ResponseEntity<Any> {
         return accountService.personalToPersonalTransfer(request)
+    }
+
+    @PostMapping("/topUpCreditCard")
+    fun topUpCreditCard(@RequestBody request: TopUpCreditCardDto): ResponseEntity<Any> {
+        return accountService.topUpCreditCard(request)
     }
 }
 

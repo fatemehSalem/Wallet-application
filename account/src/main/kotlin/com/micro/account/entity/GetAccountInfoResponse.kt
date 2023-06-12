@@ -63,4 +63,24 @@ data class TransactionLimits(
     val wallet_to_wallet_limit: BigDecimal?,
 )
 
+data class WalletInfo(
+    val id: String?,
+    val name: String?,
+    val account_number: String?,
+    val account_type: String?,
+    val created_date_utc: String?,
+    val number: String?,
+    val phone_country_code: String?,
+    val phone_number: String?,
+    val email: String?,
+    val total_balance: BigDecimal?,
+    val monthly_incoming_total: BigDecimal?,
+    val monthly_outgoing_total: BigDecimal?,
+    val access_level_status_id: Int?,
+    val access_level_status: String?,
+    val payment_balance: PaymentBalance?,
+    val cash_balance: CashBalance?,
+    val transaction_limits: TransactionLimits?
+)
+
 
