@@ -260,10 +260,16 @@ class AccountService(
 
         val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
         val payload = response.body?.payload
-        if (payload != null) {
+        var response2: CustomResponse<*>? = null
+        response2 = if (payload != null) {
             accessTokenService.saveAccessToken(accessToken,payload.sender_wallet_info.account_number.toString())
+            CustomResponse(payload,"Personal To Personal Transfer was successful")
+        } else{
+            var errorCode = ErrorCode.PERSONAL_TO_PERSONAL_TRANSFER_WAS_UNSUCCESSFUL
+            CustomResponse(null, "Personal To Personal Transfer was unsuccessful: sender_wallet_number or receiver_wallet_number is wrong",
+                errorCode.code)
         }
-        val response2 = CustomResponse(payload?: "payload is null", "Personal To Personal Transfer was successful")
+
         return ResponseEntity.ok(response2)
     }
 }
