@@ -1,6 +1,8 @@
-package com.micro.account.entity
+package com.micro.account.entity.model
 
+import com.micro.account.entity.SenderWalletInfo
 import com.micro.account.entity.UserKycInfo
+import java.math.BigDecimal
 
 data class Payload(
     val user_number: String?,
@@ -29,5 +31,12 @@ data class Payload(
     val contact_address_state_province_code: String?,
     val contact_address_country_code: String?,
     val last_activity_date_utc: String?,
-    val last_failed_login_date_utc: String?
+    val last_failed_login_date_utc: String?,
+    val transaction_id: String,
+    val transaction_amount: BigDecimal,
+    val receiver_first_name: String,
+    val receiver_last_name: String,
+    val receiver_account_number: String,
+    val sender_wallet_info: SenderWalletInfo
+
 )

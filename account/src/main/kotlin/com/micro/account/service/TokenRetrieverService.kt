@@ -13,7 +13,7 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
 
 @Service
-class TokenRetriever() {
+class TokenRetrieverService() {
     @Autowired
     private lateinit var tokenRepository: AccessTokenRepository
 

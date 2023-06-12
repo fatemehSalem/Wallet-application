@@ -19,6 +19,10 @@ object GeneralUtils {
             phoneNumber
         }
     }
+    fun generateRandomNumber(): String {
+        val random = Random(System.currentTimeMillis())
+        return random.nextInt(10000000, 99999999).toString()
+    }
 /*
     fun createCustomResponse(data: Any, message: String, status: Int): CustomResponse<Any> {
         val data = data

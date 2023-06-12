@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface AccessTokenRepository: JpaRepository<AccessToken, Long> {
-    fun findByUserPhoneNumber(userPhoneNumber: String): AccessToken?
+    fun findByAccountNumber(accountNumber: String): AccessToken?
 }

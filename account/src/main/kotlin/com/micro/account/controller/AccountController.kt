@@ -1,10 +1,11 @@
 package com.micro.account.controller
 
 import com.micro.account.entity.ErrorCode
-import com.micro.account.entity.OTPCheck
+import com.micro.account.entity.model.OTPCheck
 import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.LoginRequest
+import com.micro.account.entity.dto.P2PTransferRequestDto
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.service.AccountService
 import org.springframework.beans.factory.annotation.Autowired
@@ -103,6 +104,10 @@ class AccountController {
         return accountService.changeAccountPassword(request)
     }
 
+    @PostMapping("/personalToPersonalTransfer")
+    fun personalToPersonalTransfer(@RequestBody request: P2PTransferRequestDto): ResponseEntity<Any> {
+        return accountService.personalToPersonalTransfer(request)
+    }
 }
 
 

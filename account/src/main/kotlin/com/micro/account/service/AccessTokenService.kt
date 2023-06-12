@@ -7,21 +7,21 @@ import java.time.Instant
 
 @Service
 class AccessTokenService(private val accessTokenRepository: AccessTokenRepository) {
-    fun saveAccessToken(token: String, userPhoneNumber: String) {
+    fun saveAccessToken(token: String, accountNumber: String) {
         val currentTime = Instant.now()
         val expirationTime = currentTime.plusSeconds(28800)
 
         val tokenEntity = AccessToken()
         tokenEntity.accessToken = token
-        tokenEntity.userPhoneNumber = userPhoneNumber
+        tokenEntity.accountNumber = accountNumber
         tokenEntity.creationTime = currentTime
         tokenEntity.expirationTime = expirationTime
 
         accessTokenRepository.save(tokenEntity)
     }
 
-    fun isAccessTokenExpired(userPhoneNumber: String): Boolean {
-        val tokenEntity = accessTokenRepository.findByUserPhoneNumber(userPhoneNumber)
+    fun isAccessTokenExpired(accountNumber: String): Boolean {
+        val tokenEntity = accessTokenRepository.findByAccountNumber(accountNumber)
             ?:
             return true
 
@@ -31,7 +31,7 @@ class AccessTokenService(private val accessTokenRepository: AccessTokenRepositor
         return currentTime.isAfter(expirationTime)
     }
 
-    fun findByUserPhoneNumber(userPhoneNumber: String): AccessToken? {
-        return accessTokenRepository.findByUserPhoneNumber(userPhoneNumber)
+    fun findByAccountNumber(accountNumber: String): AccessToken? {
+        return accessTokenRepository.findByAccountNumber(accountNumber)
     }
 }

@@ -6,11 +6,15 @@ import com.micro.account.entity.model.*
 import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.GetAccountInfoRequest
+import com.micro.account.entity.dto.P2PTransferRequestDto
+import com.micro.account.entity.request.P2PTransferRequest
 import com.micro.account.entity.response.AccountResponse
 import com.micro.account.entity.response.CustomResponse
+import com.micro.account.entity.response.P2PTransferResponse
 import com.micro.account.mapper.AccountMapper
 import com.micro.account.repository.AccountRepository
 import com.micro.account.repository.OTPRepository
+import com.micro.account.utils.GeneralUtils.generateRandomNumber
 import com.micro.account.utils.GeneralUtils.splitLastFourDigits
 import com.micro.account.utils.PasswordEncoderUtils
 import org.springframework.http.*
@@ -22,7 +26,7 @@ import java.util.*
 class AccountService(
 
     private val accountRepository: AccountRepository,
-    private val tokenRetriever: TokenRetriever,
+    private val tokenRetriever: TokenRetrieverService,
     private val accessTokenService: AccessTokenService,
     private val otpRepository: OTPRepository,
     ) {
@@ -95,6 +99,7 @@ class AccountService(
                         contactAddress
                     )
                     val payload = callAccountRegister(accountRequest)
+
                     account.accountNumber = payload.account_number.toString()
                     account.walletNumber = payload.wallet_number.toString()
                     account.currencyCode = accountRequest.currency_code
@@ -126,7 +131,6 @@ class AccountService(
 
     fun callAccountRegister(accountRequest: AccountRequestToSave): Payload {
         val accessTokenToAPIs = tokenRetriever.retrieveToken()
-        accessTokenService.saveAccessToken(accessTokenToAPIs,accountRequest.user_phone_number) //save accesstoken for using in next call APIS
         val restTemplate = RestTemplate()
         val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount"
         val headers = HttpHeaders()
@@ -136,7 +140,10 @@ class AccountService(
         val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, AccountResponse::class.java)
 
         val payload = response.body?.payload
-
+        if (payload != null) {
+            //save accessToken for using in next call APIS
+            accessTokenService.saveAccessToken(accessTokenToAPIs,payload.account_number.toString())
+        }
         return payload ?: throw IllegalStateException("Payload not found in the response.")
     }
 
@@ -188,10 +195,10 @@ class AccountService(
         val account = accountRepository.findByUserPhoneNumber(userPhoneNumber)
         val accessToken: String
         if(account!= null){
-            accessToken = if(accessTokenService.isAccessTokenExpired(userPhoneNumber))
+            accessToken = if(accessTokenService.isAccessTokenExpired(account.accountNumber))
                 tokenRetriever.retrieveToken()
             else
-                accessTokenService.findByUserPhoneNumber(userPhoneNumber)?.accessToken ?:tokenRetriever.retrieveToken()
+                accessTokenService.findByAccountNumber(account.accountNumber)?.accessToken ?:tokenRetriever.retrieveToken()
 
             val restTemplate = RestTemplate()
             val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/GetPersonalAccount"
@@ -201,6 +208,9 @@ class AccountService(
 
             val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GetAccountInfoResponse::class.java)
             val payload = response.body?.payload
+            if (payload != null) {
+                accessTokenService.saveAccessToken(accessToken,payload.account_number.toString())
+            }
             val response2 = CustomResponse(payload?: "payload is null", "Get Account Info was successful")
             return ResponseEntity.ok(response2)
         }
@@ -224,6 +234,36 @@ class AccountService(
         return ResponseEntity.ok(response)
     }
 
+    fun personalToPersonalTransfer(request: P2PTransferRequestDto):ResponseEntity<Any> {
+        val request = P2PTransferRequest(
+            request.sender_account_number,
+            request.sender_wallet_number,
+            request.amount,
+            "TRY",
+            request.receiver_wallet_number,
+            generateRandomNumber(),
+            "",
+            "",
+            "",
+            ""
+        )
 
+        val accessToken: String = if(accessTokenService.isAccessTokenExpired(request.sender_account_number))
+                tokenRetriever.retrieveToken()
+            else
+                accessTokenService.findByAccountNumber(request.sender_account_number)?.accessToken ?:tokenRetriever.retrieveToken()
+        val restTemplate = RestTemplate()
+        val requestUrl = "https://stsapiuat.walletgate.io/v1/Transaction/PersonalToPersonalTransfer"
+        val headers = HttpHeaders()
+        headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+        val requestBody =  HttpEntity(request, headers)
 
+        val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
+        val payload = response.body?.payload
+        if (payload != null) {
+            accessTokenService.saveAccessToken(accessToken,payload.sender_wallet_info.account_number.toString())
+        }
+        val response2 = CustomResponse(payload?: "payload is null", "Personal To Personal Transfer was successful")
+        return ResponseEntity.ok(response2)
+    }
 }

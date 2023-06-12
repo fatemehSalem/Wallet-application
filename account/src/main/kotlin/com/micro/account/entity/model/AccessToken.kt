@@ -14,8 +14,8 @@ data class AccessToken(
     @Column(name = "access_token", nullable = false, length = 1000)
     var accessToken: String,
 
-    @Column(name = "user_phone_number", nullable = false )
-    var userPhoneNumber: String,
+    @Column(name = "account_number", nullable = false )
+    var accountNumber: String,
 
     @Column(name = "creation_Time", nullable = false)
     var creationTime: Instant = Instant.now(),
