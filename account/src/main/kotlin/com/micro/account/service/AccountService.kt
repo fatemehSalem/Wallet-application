@@ -158,10 +158,12 @@ class AccountService(
                     if (PasswordEncoderUtils.verifyPassword(password, user.password)) {
                         retVal = true
                         val code = splitLastFourDigits(userPhoneNumber)
-                        val otp = OTP()
-                        otp.userPhoneNumber = userPhoneNumber
-                        otp.userOtpCode = code
-                        otpRepository.save(otp)
+                        if(otpRepository.findByUserPhoneNumber(userPhoneNumber)== null){
+                            val otpToSave = OTP()
+                            otpToSave.userPhoneNumber = userPhoneNumber
+                            otpToSave.userOtpCode = code
+                            otpRepository.save(otpToSave)
+                        }
                     }
                 }
             }
