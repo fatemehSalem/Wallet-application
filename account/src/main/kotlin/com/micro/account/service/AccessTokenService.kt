@@ -4,6 +4,7 @@ import com.micro.account.entity.model.AccessToken
 import com.micro.account.repository.AccessTokenRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.time.LocalDateTime
 
 @Service
 class AccessTokenService(private val accessTokenRepository: AccessTokenRepository) {
@@ -16,7 +17,7 @@ class AccessTokenService(private val accessTokenRepository: AccessTokenRepositor
         tokenEntity.accountNumber = accountNumber
         tokenEntity.creationTime = currentTime
         tokenEntity.expirationTime = expirationTime
-
+        tokenEntity.createdAt = LocalDateTime.now()
         accessTokenRepository.save(tokenEntity)
     }
 

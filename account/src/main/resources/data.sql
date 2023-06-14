@@ -21,3 +21,17 @@ CREATE TABLE accessToken (
                          access_token VARCHAR(255) NULL,
                          userPhoneNumber VARCHAR(255) NOT NULL
 );
+
+
+ALTER TABLE account
+    ADD created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ADD updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE otp
+    ADD created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE access_token
+    ADD created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- UPDATE account
+-- SET created_at = CURRENT_TIMESTAMP;

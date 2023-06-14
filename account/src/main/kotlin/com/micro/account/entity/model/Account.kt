@@ -1,7 +1,7 @@
 package com.micro.account.entity.model
 
 import javax.persistence.*
-
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "account")
@@ -59,7 +59,13 @@ which means that they are immutable. However, you can still declare a var proper
   var zipPostalCode: String,
 
   @Column(name = "state_province_code")
-  var stateProvinceCode: String
+  var stateProvinceCode: String,
+
+  @Column(name = "created_at", nullable = false, updatable = false)
+  var createdAt: LocalDateTime = LocalDateTime.now(),
+
+  @Column(name = "updated_at")
+  var updatedAt: LocalDateTime = LocalDateTime.now()
 ){
   constructor() : this(0, "", "", "", "",
             "","","","","",

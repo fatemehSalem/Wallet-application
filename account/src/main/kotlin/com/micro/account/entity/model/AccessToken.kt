@@ -2,9 +2,10 @@ package com.micro.account.entity.model
 
 import javax.persistence.*
 import java.time.Instant
+import java.time.LocalDateTime
 
 @Entity
-@Table(name = "accessToken")
+@Table(name = "access_token")
 
 data class AccessToken(
     @Id
@@ -21,7 +22,10 @@ data class AccessToken(
     var creationTime: Instant = Instant.now(),
 
     @Column(name = "expiration_Time",nullable = false)
-    var expirationTime: Instant = Instant.now()
+    var expirationTime: Instant = Instant.now(),
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdAt: LocalDateTime = LocalDateTime.now()
 ) {
     //to fix the error: Class 'Token' should have [public, protected] no-arg constructor error
     constructor() : this(0, "", "" )

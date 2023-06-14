@@ -1,9 +1,6 @@
 package com.micro.account.entity.model
 
-import com.micro.account.entity.SenderWalletInfo
-import com.micro.account.entity.TransactionLimits
-import com.micro.account.entity.UserKycInfo
-import com.micro.account.entity.WalletInfo
+import com.micro.account.entity.*
 import java.math.BigDecimal
 
 data class Payload(
@@ -43,7 +40,13 @@ data class Payload(
     val ext_transaction_id: String?,
     val transaction_fee_amount: BigDecimal?,
     val previous_amount: BigDecimal?,
-    val wallet_info: WalletInfo?
-
-
+    val wallet_info: WalletInfo?,
+    val results: List<Results>?,
+    val page_index: Int?,
+    val last_row_index: Int?,
+    val page_count: Int?,
+    val page_size: Int?,
+    val row_count: Int?,
+    val order_column: String?,
+    val order_by: String?,
     )
