@@ -1,6 +1,7 @@
 package com.micro.account.service
 
 import com.micro.account.entity.ErrorCode
+import com.micro.account.entity.Results
 import com.micro.account.entity.dto.P2PTransferRequestDto
 import com.micro.account.entity.dto.TopUpCreditCardDto
 import com.micro.account.entity.request.P2PTransferRequest
@@ -9,6 +10,7 @@ import com.micro.account.entity.request.TransactionHistoryRequest
 import com.micro.account.entity.request.WalletInfoRequest
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.entity.response.P2PTransferResponse
+import com.micro.account.entity.response.TransactionHistoryResponse
 import com.micro.account.repository.AccountRepository
 import com.micro.account.utils.GeneralUtils
 import org.springframework.http.HttpEntity
@@ -17,6 +19,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Service
@@ -113,7 +116,7 @@ class TransactionService(
             if (payload != null) {
                 return ResponseEntity.ok(
                     CustomResponse(
-                        payload.results,
+                        payload.results?.let { createTransactionHistoryResponseList(it) },
                         "Account get Transaction History was successful"
                     )
                 )
@@ -184,5 +187,19 @@ class TransactionService(
             )
         )
 
+    }
+
+    fun createTransactionHistoryResponseList(resultsList: List<Results>): List<TransactionHistoryResponse> {
+        return resultsList.map { results ->
+            TransactionHistoryResponse(
+                transaction_id = results.id,
+                tx_base_amount = results.tx_base_amount,
+                from_account_Id = results.from_account_Id,
+                to_account_id = results.to_account_Id,
+                transaction_type_id = results.transaction_type_id,
+                transaction_type = results.transaction_type,
+                completed_date_utc = results.completed_date_utc
+            )
+        }
     }
 }
