@@ -121,7 +121,7 @@ class TransactionService(
         if (senderWalletNumber != null
             && receiverWalletNumber != null
         ) {
-            val request = P2PTransferRequest(
+            val p2pRequest = P2PTransferRequest(
                 request.sender_account_number,
                 senderWalletNumber,
                 request.amount,
@@ -141,7 +141,7 @@ class TransactionService(
                     ?: tokenRetriever.retrieveToken()
             val payload = GeneralUtils.runBackOfficeApI(
                 "https://stsapiuat.walletgate.io/v1/Transaction/PersonalToPersonalTransfer",
-                accessToken, request
+                accessToken, p2pRequest
             )
             val response2: CustomResponse<*> = if (payload != null) {
 
