@@ -4,18 +4,15 @@ import com.micro.account.entity.*
 import com.micro.account.entity.dto.*
 import com.micro.account.entity.model.*
 import com.micro.account.entity.request.*
-import com.micro.account.entity.response.AccountResponse
 import com.micro.account.entity.response.CustomResponse
-import com.micro.account.entity.response.P2PTransferResponse
 import com.micro.account.mapper.AccountMapper
 import com.micro.account.repository.AccountRepository
 import com.micro.account.repository.OTPRepository
-import com.micro.account.utils.GeneralUtils.generateRandomNumber
+import com.micro.account.utils.GeneralUtils
 import com.micro.account.utils.GeneralUtils.splitLastFourDigits
 import com.micro.account.utils.PasswordEncoderUtils
 import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -127,15 +124,10 @@ class AccountService(
 
     fun callAccountRegister(accountRequest: AccountRequestToSave): Payload {
         val accessTokenToAPIs = tokenRetriever.retrieveToken()
-        val restTemplate = RestTemplate()
-        val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount"
-        val headers = HttpHeaders()
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessTokenToAPIs")
-        val requestBody = HttpEntity(accountRequest, headers)
-
-        val response = restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, AccountResponse::class.java)
-
-        val payload = response.body?.payload
+        val payload = GeneralUtils.runBackOfficeApI(
+            "https://stsapiuat.walletgate.io/v1/Account/RegisterPersonalAccount",
+            accessTokenToAPIs, accountRequest
+        )
         if (payload != null) {
             //save accessToken for using in next call APIS
             accessTokenService.saveAccessToken(accessTokenToAPIs, payload.account_number.toString())
@@ -215,34 +207,26 @@ class AccountService(
     }
 
     fun getWalletIdByWalletInfo(account: Account, accessToken: String): ResponseEntity<Any> {
-        val restTemplate = RestTemplate()
-        val requestUrl = "https://stsapiuat.walletgate.io/v1/Account/GetPersonalAccount"
-        val headers = HttpHeaders()
-        headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-        val requestBody = HttpEntity(GetAccountInfoRequest(account.accountNumber), headers)
-
-        val response =
-            restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GetAccountInfoResponse::class.java)
-        val payload = response.body?.payload
-        if (payload != null) {
-            val requestUrl = "https://stsapiuat.walletgate.io/v1/wallet/info"
-            headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            val requestBody = HttpEntity(WalletInfoRequest(account.accountNumber, account.walletNumber), headers)
-
-            val response =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
-            val payloadSecond = response.body?.payload
-            if (payloadSecond != null) {
+        val firstPayload = GeneralUtils.runBackOfficeApI(
+            "https://stsapiuat.walletgate.io/v1/Account/GetPersonalAccount",
+            accessToken, GetAccountInfoRequest(account.accountNumber)
+        )
+        if (firstPayload != null) {
+            val secondPayload = GeneralUtils.runBackOfficeApI(
+                "https://stsapiuat.walletgate.io/v1/wallet/info",
+                accessToken, WalletInfoRequest(account.accountNumber, account.walletNumber)
+            )
+            if (secondPayload != null) {
                 val getInfoResponse = GetAccountInfoResponseDto(
                     account.accountNumber,
-                    payloadSecond?.wallet_info?.user_kyc_info?.first_name.toString(),
-                    payloadSecond?.wallet_info?.user_kyc_info?.last_name.toString(),
-                    payloadSecond?.wallet_info?.total_balance,
-                    payloadSecond?.wallet_info?.transaction_limits?.max_balance,
-                    payloadSecond?.wallet_info?.user_kyc_info?.kyc_level_status.toString(),
-                    payloadSecond?.wallet_info?.user_kyc_info?.kyc_level.toString()
+                    secondPayload.wallet_info?.user_kyc_info?.first_name.toString(),
+                    secondPayload.wallet_info?.user_kyc_info?.last_name.toString(),
+                    secondPayload.wallet_info?.total_balance,
+                    secondPayload.wallet_info?.transaction_limits?.max_balance,
+                    secondPayload.wallet_info?.user_kyc_info?.kyc_level_status.toString(),
+                    secondPayload.wallet_info?.user_kyc_info?.kyc_level.toString()
                 )
-                account?.walletId = payloadSecond.wallet_info?.id.toString()
+                account.walletId = secondPayload.wallet_info?.id.toString()
                 account.updatedAt = LocalDateTime.now()
                 accountRepository.save(account)
                 val response2 = CustomResponse(getInfoResponse, "Get Account Info was successful")

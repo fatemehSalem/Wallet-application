@@ -1,7 +1,6 @@
 package com.micro.account.service
 
 import com.micro.account.entity.ErrorCode
-import com.micro.account.entity.Results
 import com.micro.account.entity.dto.P2PTransferRequestDto
 import com.micro.account.entity.dto.TopUpCreditCardDto
 import com.micro.account.entity.request.P2PTransferRequest
@@ -9,17 +8,11 @@ import com.micro.account.entity.request.TopUpCreditCardRequest
 import com.micro.account.entity.request.TransactionHistoryRequest
 import com.micro.account.entity.request.WalletInfoRequest
 import com.micro.account.entity.response.CustomResponse
-import com.micro.account.entity.response.P2PTransferResponse
-import com.micro.account.entity.response.TransactionHistoryResponse
 import com.micro.account.repository.AccountRepository
 import com.micro.account.utils.GeneralUtils
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
+import com.micro.account.utils.GeneralUtils.createTransactionHistoryResponseList
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
-import java.math.BigDecimal
 import java.time.LocalDateTime
 
 @Service
@@ -30,7 +23,7 @@ class TransactionService(
 ) {
     fun topUpCreditCard(request: TopUpCreditCardDto): ResponseEntity<Any> {
         val senderWalletNumber = accountRepository.findByAccountNumber(request.sender_account_number)?.walletNumber
-        var accessToken = ""
+        val accessToken: String
         if (senderWalletNumber != null) {
             if (accessTokenService.isAccessTokenExpired(request.sender_account_number)) {
                 accessToken = tokenRetriever.retrieveToken()
@@ -50,14 +43,10 @@ class TransactionService(
                 "",
                 ""
             )
-            val restTemplate = RestTemplate()
-            val requestUrl = "https://stsapiuat.walletgate.io/v1/Transaction/TopupCreditCard"
-            val headers = HttpHeaders()
-            headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            val requestBody = HttpEntity(topUpRequest, headers)
-            val response =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
-            val payload = response.body?.payload
+            val payload = GeneralUtils.runBackOfficeApI(
+                "https://stsapiuat.walletgate.io/v1/Transaction/TopupCreditCard",
+                accessToken, topUpRequest
+            )
             return ResponseEntity.ok(CustomResponse(payload, "TopUp Credit Card was successful"))
         }
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
@@ -80,18 +69,13 @@ class TransactionService(
             } else
                 accessToken = accessTokenService.findByAccountNumber(accountNumber)?.accessToken
                     ?: tokenRetriever.retrieveToken()
-            val restTemplate = RestTemplate()
-            val headers = HttpHeaders()
             if (account.walletId.isEmpty()) {
-                headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-                val requestUrl = "https://stsapiuat.walletgate.io/v1/wallet/info"
-                headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-                val requestBody = HttpEntity(WalletInfoRequest(account.accountNumber, account.walletNumber), headers)
-                val response =
-                    restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
-                val payload = response.body?.payload
+                val payload = GeneralUtils.runBackOfficeApI(
+                    "https://stsapiuat.walletgate.io/v1/wallet/info",
+                    accessToken, WalletInfoRequest(account.accountNumber, account.walletNumber)
+                )
                 if (payload != null) {
-                    account?.walletId = payload.wallet_info?.id.toString()
+                    account.walletId = payload.wallet_info?.id.toString()
                     account.updatedAt = LocalDateTime.now()
                     accountRepository.save(account)
                 }
@@ -107,12 +91,10 @@ class TransactionService(
                 "Id",
                 "asc"
             )
-            val requestUrl = "https://stsapiuat.walletgate.io/v1/TransactionData/SummaryRecordByFilter"
-            headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            val requestBody = HttpEntity(transactionHistoryRequest, headers)
-            val response =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
-            val payload = response.body?.payload
+            val payload = GeneralUtils.runBackOfficeApI(
+                "https://stsapiuat.walletgate.io/v1/TransactionData/SummaryRecordByFilter",
+                accessToken, transactionHistoryRequest
+            )
             if (payload != null) {
                 return ResponseEntity.ok(
                     CustomResponse(
@@ -135,7 +117,7 @@ class TransactionService(
     fun personalToPersonalTransfer(request: P2PTransferRequestDto): ResponseEntity<Any> {
         val senderWalletNumber = accountRepository.findByAccountNumber(request.sender_account_number)?.walletNumber
         val receiverWalletNumber = accountRepository.findByAccountNumber(request.receiver_account_number)?.walletNumber
-        var accessToken = ""
+        val accessToken: String
         if (senderWalletNumber != null
             && receiverWalletNumber != null
         ) {
@@ -157,16 +139,11 @@ class TransactionService(
             } else
                 accessToken = accessTokenService.findByAccountNumber(request.sender_account_number)?.accessToken
                     ?: tokenRetriever.retrieveToken()
-            val restTemplate = RestTemplate()
-            val requestUrl = "https://stsapiuat.walletgate.io/v1/Transaction/PersonalToPersonalTransfer"
-            val headers = HttpHeaders()
-            headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            val requestBody = HttpEntity(request, headers)
-
-            val response =
-                restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, P2PTransferResponse::class.java)
-            val payload = response.body?.payload
-            var response2: CustomResponse<*>? = if (payload != null) {
+            val payload = GeneralUtils.runBackOfficeApI(
+                "https://stsapiuat.walletgate.io/v1/Transaction/PersonalToPersonalTransfer",
+                accessToken, request
+            )
+            val response2: CustomResponse<*> = if (payload != null) {
 
                 CustomResponse(payload, "Personal To Personal Transfer was successful")
             } else {
@@ -189,17 +166,5 @@ class TransactionService(
 
     }
 
-    fun createTransactionHistoryResponseList(resultsList: List<Results>): List<TransactionHistoryResponse> {
-        return resultsList.map { results ->
-            TransactionHistoryResponse(
-                transaction_id = results.id,
-                tx_base_amount = results.tx_base_amount,
-                from_account_Id = results.from_account_Id,
-                to_account_id = results.to_account_Id,
-                transaction_type_id = results.transaction_type_id,
-                transaction_type = results.transaction_type,
-                completed_date_utc = results.completed_date_utc
-            )
-        }
-    }
+
 }
