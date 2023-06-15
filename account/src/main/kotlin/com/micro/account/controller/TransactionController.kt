@@ -33,4 +33,10 @@ class TransactionController {
     fun transactionHistory(@PathVariable accountNumber: String): ResponseEntity<Any> {
         return transactionService.transactionHistory(accountNumber)
     }
+
+    @GetMapping("/transactionDetail/{transactionId}/{accountNumber}")
+    @ApiOperation("Get Transaction Detail By Transaction_Id and Account_Number")
+    fun transactionDetail(@PathVariable transactionId: String,@PathVariable accountNumber: String ): ResponseEntity<Any> {
+        return transactionService.transactionDetail(transactionId, accountNumber)
+    }
 }

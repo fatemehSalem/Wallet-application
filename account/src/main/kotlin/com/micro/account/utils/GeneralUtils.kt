@@ -3,7 +3,7 @@ package com.micro.account.utils
 import com.micro.account.entity.Results
 import com.micro.account.entity.model.Payload
 import com.micro.account.entity.response.GeneralResponse
-import com.micro.account.entity.response.TransactionHistoryResponse
+import com.micro.account.entity.response.TransactionResponse
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -39,21 +39,36 @@ object GeneralUtils {
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
         val requestBody = HttpEntity(request, headers)
         val response =
-            restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GeneralResponse::class.java)
+                restTemplate.exchange(requestUrl, HttpMethod.POST, requestBody, GeneralResponse::class.java)
         return response.body?.payload
     }
 
-    fun createTransactionHistoryResponseList(resultsList: List<Results>): List<TransactionHistoryResponse> {
+    fun createTransactionHistoryResponseList(resultsList: List<Results>): List<TransactionResponse> {
         return resultsList.map { results ->
-            TransactionHistoryResponse(
-                transaction_id = results.id,
-                tx_base_amount = results.tx_base_amount,
-                from_account_Id = results.from_account_Id,
-                to_account_id = results.to_account_Id,
-                transaction_type_id = results.transaction_type_id,
-                transaction_type = results.transaction_type,
-                completed_date_utc = results.completed_date_utc
+            TransactionResponse(
+                    transaction_id = results.id,
+                    tx_base_amount = results.tx_base_amount,
+                    to_account_number = results.to_account_number,
+                    to_description = results.to_description,
+                    from_description = results.from_description,
+                    transaction_type_id = results.transaction_type_id,
+                    transaction_type = results.transaction_type,
+                    completed_date_utc = results.completed_date_utc
             )
         }
     }
+
+    fun createTransactionDetailResponse(result: Results): TransactionResponse {
+        return TransactionResponse(
+                transaction_id = result.id,
+                tx_base_amount = result.tx_base_amount,
+                to_account_number = result.to_account_number,
+                to_description = result.to_description,
+                from_description = result.from_description,
+                transaction_type_id = result.transaction_type_id,
+                transaction_type = result.transaction_type,
+                completed_date_utc = result.completed_date_utc
+        )
+    }
+
 }
