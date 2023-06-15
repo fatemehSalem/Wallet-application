@@ -6,7 +6,7 @@ data class AccountRequest(
     val user_phone_country_code: String,
     val user_phone_number: String,
     val user_email: String,
-    val password:String
+    val user_password:String
 
 )
 

@@ -32,7 +32,7 @@ class AccountService(
     fun createNewAccountInMemory(accountRequest: AccountRequest): ResponseEntity<Any> {
         val accountDto = AccountDto(
             "",
-            accountRequest.password,
+            accountRequest.user_password,
             "TRY",
             "",
             "",
@@ -53,7 +53,7 @@ class AccountService(
         val accountDto = accountMap["123"]
         val account = Account()
         if (accountDto != null) {
-            if (accountDto.otpCode != otpCheck.code || accountDto.userPhoneNumber != otpCheck.phoneNumber) {
+            if (accountDto.otpCode != otpCheck.user_otp_code || accountDto.userPhoneNumber != otpCheck.user_phone_number) {
                 val errorCode = ErrorCode.INVALID_OTP_CODE
                 val response = CustomResponse(
                     null,
@@ -171,9 +171,9 @@ class AccountService(
 
 
     fun verifyOTP(otpCheck: OTPCheck): ResponseEntity<Any> {
-        val otp = otpRepository.findByUserPhoneNumber(otpCheck.phoneNumber)
+        val otp = otpRepository.findByUserPhoneNumber(otpCheck.user_phone_number)
         if (otp != null) {
-            if (otp.userOtpCode == otpCheck.code && otp.userPhoneNumber == otpCheck.phoneNumber) {
+            if (otp.userOtpCode == otpCheck.user_otp_code && otp.userPhoneNumber == otpCheck.user_phone_number) {
                 val response = CustomResponse(null, "Account OTP verification was Successful")
                 return ResponseEntity.ok(response)
             }
@@ -242,9 +242,9 @@ class AccountService(
     }
 
     fun changeAccountPassword(request: ChangeAccountPasswordRequest): ResponseEntity<Any> {
-        val account = accountRepository.findByUserPhoneNumber(request.phoneNumber)
+        val account = accountRepository.findByUserPhoneNumber(request.user_phone_number)
         if (account != null) {
-            account.password = PasswordEncoderUtils.encryptPassword(request.newPassword)
+            account.password = PasswordEncoderUtils.encryptPassword(request.user_new_password)
             account.updatedAt = LocalDateTime.now()
             accountRepository.save(account)
             val response = CustomResponse(account, "Change Account Password was Successful")

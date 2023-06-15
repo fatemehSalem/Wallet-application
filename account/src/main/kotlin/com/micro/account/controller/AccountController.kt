@@ -5,8 +5,6 @@ import com.micro.account.entity.model.OTPCheck
 import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.LoginRequest
-import com.micro.account.entity.dto.P2PTransferRequestDto
-import com.micro.account.entity.dto.TopUpCreditCardDto
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.entity.response.LoginResponse
 import com.micro.account.service.AccountService
@@ -27,9 +25,9 @@ class AccountController {
     @PostMapping("/login")
     @ApiOperation("Account Login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
-        if (accountService.authenticate(loginRequest.phoneNumber, loginRequest.password)) {
-            accountService.generateOtp(loginRequest.phoneNumber)
-            val response = accountService.findByUserPhoneNumber(loginRequest.phoneNumber)
+        if (accountService.authenticate(loginRequest.user_phone_number, loginRequest.user_password)) {
+            accountService.generateOtp(loginRequest.user_phone_number)
+            val response = accountService.findByUserPhoneNumber(loginRequest.user_phone_number)
                 ?.let { CustomResponse(LoginResponse(it.accountNumber), "Account Authentication was Successful") }
             return ResponseEntity.ok(response)
         }
