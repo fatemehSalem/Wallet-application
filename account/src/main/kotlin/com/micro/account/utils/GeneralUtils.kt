@@ -49,8 +49,8 @@ object GeneralUtils {
                     transaction_id = results.id,
                     tx_base_amount = results.tx_base_amount,
                     to_account_number = results.to_account_number,
-                    to_description = results.to_description,
-                    from_description = results.from_description,
+                    to_account_name = results.to_description,
+                    from_account_name = results.from_description,
                     transaction_type_id = results.transaction_type_id,
                     transaction_type = results.transaction_type,
                     completed_date_utc = results.completed_date_utc
@@ -63,8 +63,8 @@ object GeneralUtils {
                 transaction_id = result.id,
                 tx_base_amount = result.tx_base_amount,
                 to_account_number = result.to_account_number,
-                to_description = result.to_description,
-                from_description = result.from_description,
+                to_account_name = result.to_description,
+                from_account_name = result.from_description,
                 transaction_type_id = result.transaction_type_id,
                 transaction_type = result.transaction_type,
                 completed_date_utc = result.completed_date_utc

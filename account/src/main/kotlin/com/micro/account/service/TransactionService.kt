@@ -45,7 +45,18 @@ class TransactionService(
                     "https://stsapiuat.walletgate.io/v1/Transaction/TopupCreditCard",
                     accessToken, topUpRequest
             )
-            return ResponseEntity.ok(CustomResponse(payload, "TopUp Credit Card was successful"))
+            if(payload!= null){
+                return ResponseEntity.ok(CustomResponse(payload, "TopUp Credit Card was successful"))
+            }
+
+            val errorCode = ErrorCode.TOP_UP_TRANSACTION_WAS_UNSUCCESSFUL
+            return ResponseEntity.ok(
+                    CustomResponse(
+                            null,
+                            "TopUp Credit Card was unsuccessful: the amount is higher than the allowed amount",
+                            errorCode.code
+                    )
+            )
         }
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
         return ResponseEntity.ok(
