@@ -1,24 +1,35 @@
 server:
-  port: 8088
+  port: 8080
 
 spring:
+  profiles:
+    default: default
   application:
-    name: account
+    name: account-service
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        prefer-ip-address: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/hepcarddb
-    username: hepcarduser
-    password: hepcardpass
+    url: jdbc:postgresql://localhost:5432/accountdb?serverTimezone=UTC
+    username: user
+    password: admin
   jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        ddl-auto: none
-        show-sql: true
         format_sql: true
-        jdbc:
-          time_zone: UTC
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+
+
+
 
 #http://localhost:8088/swagger-ui/index.html
