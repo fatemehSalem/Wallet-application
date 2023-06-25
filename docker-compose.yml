@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   consul:
     image: consul
@@ -12,11 +13,29 @@ services:
     build: ./account
     ports:
       - "8080:8080"
-    container_name: account-service
+    container_name: account
     restart: on-failure
     depends_on:
       - consul
       - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/accountdb?serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - spring_cloud_consul_host=consul
+    env_file:
+      - .env.development
+
+  transaction:
+    build: ./transaction
+    ports:
+      - "8080:8080"
+    container_name: account
+    restart: on-failure
+    depends_on:
+      - consul
+    environment:
+      - spring_cloud_consul_host=consul
     env_file:
       - .env.development
 
@@ -52,6 +71,9 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+#networks:
+#  consul-network:
 
 volumes:
   local_pgdata:

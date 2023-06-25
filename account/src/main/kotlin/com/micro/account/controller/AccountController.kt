@@ -1,18 +1,23 @@
 package com.micro.account.controller
 
 import com.micro.account.entity.ErrorCode
+import com.micro.account.entity.model.AccessToken
+import com.micro.account.entity.model.Account
 import com.micro.account.entity.model.OTPCheck
 import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.LoginRequest
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.entity.response.LoginResponse
+import com.micro.account.service.AccessTokenService
 import com.micro.account.service.AccountService
+import com.micro.account.service.TokenRetrieverService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import springfox.documentation.annotations.ApiIgnore
 
 @RestController
 @RequestMapping("/api/account")
@@ -21,6 +26,11 @@ class AccountController {
 
     @Autowired
     private lateinit var accountService: AccountService
+    @Autowired
+    private lateinit var tokenRetrieverService: TokenRetrieverService
+    @Autowired
+    private lateinit var accessTokenService: AccessTokenService
+
 
     @PostMapping("/login")
     @ApiOperation("Account Login")
@@ -70,6 +80,42 @@ class AccountController {
     }
 
 
+    @GetMapping("/findByAccountNumber/{accountNumber}")
+    @ApiIgnore
+    fun findByAccountNumber(@PathVariable accountNumber: String): Account? {
+        return accountService.findByAccountNumber(accountNumber)
+    }
+
+
+    @PostMapping("/saveAccount")
+    @ApiIgnore
+    fun saveAccount(@RequestBody account: Account): Account? {
+        return accountService.saveAccount(account)
+    }
+
+    @GetMapping("/retrieveToken")
+    @ApiIgnore
+    fun retrieveToken(): String {
+        return tokenRetrieverService.retrieveToken()
+    }
+
+    @GetMapping("/accessTokenByAccountNumber/{accountNumber}")
+    @ApiIgnore
+    fun accessTokenByAccountNumber(@PathVariable accountNumber: String): AccessToken? {
+        return accessTokenService.findByAccountNumber(accountNumber)
+    }
+
+    @GetMapping("/isAccessTokenExpired/{accountNumber}")
+    @ApiIgnore
+    fun isAccessTokenExpired(@PathVariable accountNumber: String): Boolean? {
+        return accessTokenService.isAccessTokenExpired(accountNumber)
+    }
+
+    @GetMapping("/saveAccessToken/{token}/{accountNumber}")
+    @ApiIgnore
+    fun saveAccessToken(@PathVariable token: String, @PathVariable accountNumber: String) {
+        return accessTokenService.saveAccessToken(token,accountNumber)
+    }
 }
 
 

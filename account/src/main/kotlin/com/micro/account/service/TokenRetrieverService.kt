@@ -14,9 +14,6 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 class TokenRetrieverService() {
-    @Autowired
-    private lateinit var tokenRepository: AccessTokenRepository
-
 
     fun retrieveToken(): String {
         val client_id = "EE85AF95-EBD3-4D29-800C-3E8BE9340EBD"

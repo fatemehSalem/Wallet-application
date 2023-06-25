@@ -258,5 +258,12 @@ class AccountService(
         return ResponseEntity.ok(response)
     }
 
+    fun findByAccountNumber(accountNumber:String): Account? {
+        return  accountRepository.findByAccountNumber(accountNumber)
+    }
+
+    fun saveAccount(account:Account):Account?{
+        return  accountRepository.save(account)
+    }
 
 }

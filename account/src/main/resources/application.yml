@@ -1,11 +1,11 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   profiles:
     default: default
   application:
-    name: account-service
+    name: account
   cloud:
     consul:
       host: consul
@@ -13,14 +13,14 @@ spring:
       discovery:
         prefer-ip-address: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/accountdb?serverTimezone=UTC
+    url: jdbc:postgresql://consul:5432/accountdb?serverTimezone=UTC
     username: user
     password: admin
   jpa:
     database: POSTGRESQL
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
