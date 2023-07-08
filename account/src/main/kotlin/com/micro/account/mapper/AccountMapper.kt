@@ -1,6 +1,7 @@
 package com.micro.account.mapper
 
 import com.micro.account.entity.model.Account
+import com.micro.account.entity.response.KafkaAccountResponse
 import com.micro.account.entity.response.RegisterAccountResponse
 
 object AccountMapper {
@@ -20,6 +21,18 @@ object AccountMapper {
                 account.addressLine2,
                 account.zipPostalCode,
                 account.stateProvinceCode)
+    }
+
+    fun mapAccountToKafkaAccountResponse(account: Account): KafkaAccountResponse {
+        return KafkaAccountResponse(
+            account.accountNumber,
+            account.walletNumber,
+            account.walletId,
+            account.userFirstName,
+            account.userLastName,
+            account.userPhoneNumber,
+            account.userEmail
+        )
     }
 
         //fun mapResponseToAccount()

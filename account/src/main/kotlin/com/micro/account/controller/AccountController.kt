@@ -80,13 +80,6 @@ class AccountController {
     }
 
 
-    @GetMapping("/findByAccountNumber/{accountNumber}")
-    @ApiIgnore
-    fun findByAccountNumber(@PathVariable accountNumber: String): Account? {
-        return accountService.findByAccountNumber(accountNumber)
-    }
-
-
     @PostMapping("/saveAccount")
     @ApiIgnore
     fun saveAccount(@RequestBody account: Account): Account? {

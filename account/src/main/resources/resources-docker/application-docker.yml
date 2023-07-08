@@ -1,37 +1,30 @@
-server:
-  port: 8081
-
 spring:
   profiles:
     default: docker
   application:
     name: account
   kafka:
-    producer:
-      bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     consumer:
-      bootstrap-servers: localhost:9092
-      group-id: transaction-group
       properties:
         security.protocol: PLAINTEXT
-
-    #specific.avro.reader: true
-#        deserializer.trusted.packages: java.util,java.lang,com.micro.account.entity.*
+        #specific.avro.reader: true
+        deserializer.trusted.packages: java.util,java.lang,com.micro.account.entity.*,com.micro.transaction.entity.*
   cloud:
     consul:
-      host: localhost
+      host: consul
       port: 8500
       discovery:
         prefer-ip-address: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/accountdb?serverTimezone=UTC
+    url: jdbc:postgresql://postgres:5432/accountdb?serverTimezone=UTC
     username: user
     password: admin
   jpa:
     database: POSTGRESQL
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

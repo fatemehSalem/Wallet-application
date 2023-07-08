@@ -1,0 +1,20 @@
+spring:
+  profiles:
+    default: docker
+  application:
+    name: transaction
+  kafka:
+    bootstrap-servers: kafka:9092
+    properties:
+      security.protocol: PLAINTEXT
+      #specific.avro.reader: true
+      deserializer.trusted.packages: java.util,java.lang,com.micro.account.entity.*,com.micro.transaction.entity.*
+  cloud:
+    consul:
+      host: consul
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER

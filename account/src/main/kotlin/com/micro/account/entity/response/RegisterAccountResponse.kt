@@ -17,3 +17,12 @@ data class RegisterAccountResponse (
         var zipPostalCode: String,
         var stateProvinceCode: String
 )
+data class KafkaAccountResponse (
+        var accountNumber: String,
+        var walletNumber: String,
+        var walletId:String,
+        var userFirstName: String,
+        var userLastName: String,
+        var userPhoneNumber: String,
+        var userEmail: String
+)
