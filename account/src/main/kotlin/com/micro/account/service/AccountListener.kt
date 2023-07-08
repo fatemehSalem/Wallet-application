@@ -35,6 +35,7 @@ class AccountListener(
         val accountNumber = request.value() as String
         val account = accountService.findByAccountNumber(accountNumber)
         println("findByAccountNumber in account $accountNumber")
+        var kafkaTopic: String = ""
         if (account != null) {
             val accessToken: String
             if (accessTokenService.isAccessTokenExpired(accountNumber)) {
@@ -102,20 +103,25 @@ class AccountListener(
             }
 
         } else {
-            if (topic == "transaction_to_account_topUp") {
-                kafkaTemplate.send(
-                    "account_to_transaction_topUp", KafkaTopUpResponseDto(
-                        "0", "0", "0", "0", "0", "0", "0"
-                    )
-                )
-            } else {
-                kafkaTemplate.send(
-                    "account_to_transaction_history", KafkaTopUpResponseDto(
-                        "0", "0", "0", "0", "0", "0", "0"
-                    )
-                )
+            when (topic) {
+                "transaction_to_account_topUp" -> {
+                    kafkaTopic = "account_to_transaction_topUp"
+                }
+                "transaction_to_account_history" -> {
+                    kafkaTopic = "account_to_transaction_history"
+                }
+                "transaction_to_account_detail" -> {
+                    kafkaTopic = "account_to_transaction_detail"
+                }
+                else -> {
+                    println("Received message from unknown topic in account Listener: $topic")
+                }
             }
-
+            kafkaTemplate.send(
+                kafkaTopic, KafkaTopUpResponseDto(
+                    "0", "0", "0", "0", "0", "0", "0"
+                )
+            )
         }
 
     }

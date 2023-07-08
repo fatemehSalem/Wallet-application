@@ -27,25 +27,38 @@ class TransactionDetailService(private val kafkaTemplate: KafkaTemplate<String, 
     @KafkaListener(topics = ["account_to_transaction_detail"], groupId = "transaction-group")
     fun listenToTopic(account: ConsumerRecord<String, Any>) {
         val accountData = account.value() as Map<*, *>
+        val accountNumber = accountData["accountNumber"] as String
         val accessToken = accountData["accessToken"] as String
-        val transactionDetailRequest = TransactionDetailRequest(
-            transactionId,
-            "2023-06-01T00:00",
-            LocalDateTime.now().toString(),
-            100,
-            0,
-            "Id",
-            "asc"
-        )
-        val payload = GeneralUtils.runBackOfficeApI(
-            "https://stsapiuat.walletgate.io/v1/TransactionData/SummaryRecordByFilter",
-            accessToken, transactionDetailRequest
-        )
-        if (payload != null) {
+        if (accountNumber != "0") {
+            val transactionDetailRequest = TransactionDetailRequest(
+                transactionId,
+                "2023-06-01T00:00",
+                LocalDateTime.now().toString(),
+                100,
+                0,
+                "Id",
+                "asc"
+            )
+            val payload = GeneralUtils.runBackOfficeApI(
+                "https://stsapiuat.walletgate.io/v1/TransactionData/SummaryRecordByFilter",
+                accessToken, transactionDetailRequest
+            )
+            if (payload != null) {
+                val result = ResponseEntity.ok(
+                    CustomResponse(
+                        payload.results?.let { createTransactionDetailResponse(payload.results[0]) },
+                        "Account get Transaction History was successful"
+                    )
+                )
+                responseFuture.complete(result)
+                return
+            }
+            val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
             val result = ResponseEntity.ok(
                 CustomResponse(
-                    payload.results?.let { createTransactionDetailResponse(payload.results[0]) },
-                    "Account get Transaction History was successful"
+                    null,
+                    "Account get Transaction History was unsuccessful: Account Number is wrong",
+                    errorCode.code
                 )
             )
             responseFuture.complete(result)
@@ -54,12 +67,11 @@ class TransactionDetailService(private val kafkaTemplate: KafkaTemplate<String, 
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
         val result = ResponseEntity.ok(
             CustomResponse(
-                null,
-                "Account get Transaction History was unsuccessful: Account Number is wrong",
-                errorCode.code
+                null, "TopUp Credit Card was unsuccessful: sender_account_number is wrong", errorCode.code
             )
         )
         responseFuture.complete(result)
+
     }
 
     fun getResponseFuture(): CompletableFuture<ResponseEntity<*>> {
