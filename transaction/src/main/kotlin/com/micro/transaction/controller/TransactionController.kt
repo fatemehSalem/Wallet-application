@@ -43,7 +43,10 @@ class TransactionController {
 
     @GetMapping("/transactionHistory/{accountNumber}")
     @ApiOperation("Get Transaction History By account_number")
-    fun transactionHistory(@PathVariable accountNumber: String) {
+    fun transactionHistory(@PathVariable accountNumber: String) : ResponseEntity<*>{
+        transactionHistoryService.sendFindAccountByAccountNumber(accountNumber)
+        val listenerResponse = transactionHistoryService.getResponseFuture()
+        return listenerResponse.get()
     }
 /*
 

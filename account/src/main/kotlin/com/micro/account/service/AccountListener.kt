@@ -1,7 +1,8 @@
 package com.micro.account.service
 
 
-import com.micro.account.entity.dto.KafkaAccountInfoDto
+import com.micro.account.entity.dto.KafkaTopUpResponseDto
+import com.micro.account.entity.request.WalletInfoRequest
 import com.micro.account.utils.GeneralUtils
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 
@@ -28,10 +30,13 @@ class AccountListener(
     @Autowired
     private lateinit var tokenRetrieverService: TokenRetrieverService
 
-    @KafkaListener(topics = ["transaction_to_account_topUp"], groupId = "transaction-group")
+    @KafkaListener(
+        topics = ["transaction_to_account_topUp", "transaction_to_account_history"],
+        groupId = "transaction-group"
+    )
     fun findByAccountNumber(request: ConsumerRecord<String, Any>) {
-        val accountData = request.value() as Map<*, *>
-        val accountNumber = accountData["accountNumber"] as String
+        val topic = request.topic()
+        val accountNumber = request.value() as String
         val account = accountService.findByAccountNumber(accountNumber)
         println("findByAccountNumber in account $accountNumber")
         if (account != null) {
@@ -43,28 +48,65 @@ class AccountListener(
                 accessToken = accessTokenService.findByAccountNumber(accountNumber)?.accessToken
                     ?: tokenRetrieverService.retrieveToken()
             }
-            kafkaTemplate.send(
-                "account_to_transaction_topUp",
-                KafkaAccountInfoDto(
-                    accountNumber, account.walletNumber,
-                    GeneralUtils.generateRandomNumber(), account.userFirstName, account.userLastName, accessToken
+            if (topic == "transaction_to_account_topUp") {
+                kafkaTemplate.send(
+                    "account_to_transaction_topUp", KafkaTopUpResponseDto(
+                        accountNumber,
+                        account.walletId,
+                        account.walletNumber,
+                        GeneralUtils.generateRandomNumber(),
+                        account.userFirstName,
+                        account.userLastName,
+                        accessToken
+                    )
                 )
-            )
+            } else {
+                if (account.walletId.isEmpty()) {
+                    val payload = GeneralUtils.runBackOfficeApI(
+                        "https://stsapiuat.walletgate.io/v1/wallet/info",
+                        accessToken, WalletInfoRequest(account.accountNumber, account.walletNumber)
+                    )
+                    if (payload != null) {
+                        account.walletId = payload.wallet_info?.id.toString()
+                        account.updatedAt = LocalDateTime.now()
+                        accountService.saveAccount(account)
+                    }
+                }
+                kafkaTemplate.send(
+                    "account_to_transaction_history", KafkaTopUpResponseDto(
+                        accountNumber,
+                        account.walletId,
+                        account.walletNumber,
+                        GeneralUtils.generateRandomNumber(),
+                        account.userFirstName,
+                        account.userLastName,
+                        accessToken
+                    )
+                )
+            }
+
         } else {
-            kafkaTemplate.send(
-                "account_to_transaction_topUp",
-                KafkaAccountInfoDto(
-                    "0", "0",
-                    "0", "0", "0", "0"
+            if (topic == "transaction_to_account_topUp") {
+                kafkaTemplate.send(
+                    "account_to_transaction_topUp", KafkaTopUpResponseDto(
+                        "0", "0", "0", "0", "0", "0", "0"
+                    )
                 )
-            )
+            } else {
+                kafkaTemplate.send(
+                    "account_to_transaction_history", KafkaTopUpResponseDto(
+                        "0", "0", "0", "0", "0", "0", "0"
+                    )
+                )
+            }
+
         }
 
     }
 
     @KafkaListener(topics = ["transaction_to_account_Personal_To_Personal_Transfer"], groupId = "transaction-group")
     fun sendFindAccountsByAccountNumbers(request: ConsumerRecord<String, Any>) {
-        val walletInfoMap: HashMap<String, KafkaAccountInfoDto> = HashMap()
+        val walletInfoMap: HashMap<String, KafkaTopUpResponseDto> = HashMap()
         val accountData = request.value() as Map<*, *>
         val senderAccountNumber = accountData["sender_account_number"] as String
         val receiverAccountNumber = accountData["receiver_account_number"] as String
@@ -81,34 +123,37 @@ class AccountListener(
                 accessToken = accessTokenService.findByAccountNumber(senderAccountNumber)?.accessToken
                     ?: tokenRetrieverService.retrieveToken()
             }
-            walletInfoMap["sender_account"] = KafkaAccountInfoDto(
+            walletInfoMap["sender_account"] = KafkaTopUpResponseDto(
                 senderAccountNumber,
+                senderAccount.walletId,
                 senderAccount.walletNumber,
                 GeneralUtils.generateRandomNumber(),
                 senderAccount.userFirstName,
                 senderAccount.userLastName,
                 accessToken
             )
-            walletInfoMap["receiver_account"] = KafkaAccountInfoDto(
-                receiverAccountNumber, senderAccount.walletNumber,
-                GeneralUtils.generateRandomNumber(), receiverAccount.userFirstName, receiverAccount.userLastName, "0"
+            walletInfoMap["receiver_account"] = KafkaTopUpResponseDto(
+                receiverAccountNumber,
+                receiverAccount.walletId,
+                receiverAccount.walletNumber,
+                GeneralUtils.generateRandomNumber(),
+                receiverAccount.userFirstName,
+                receiverAccount.userLastName,
+                "0"
             )
             kafkaTemplate.send(
                 "account_to_transaction_Personal_To_Personal_Transfer", walletInfoMap
             )
         } else {
-            walletInfoMap["sender_account"] = KafkaAccountInfoDto(
-                "0", "0",
-                "0", "0", "0", "0"
+            walletInfoMap["sender_account"] = KafkaTopUpResponseDto(
+                "0", "0", "0", "0", "0", "0", "0"
             )
-            walletInfoMap["receiver_account"] = KafkaAccountInfoDto(
-                "0", "0",
-                "0", "0", "0", "0"
+            walletInfoMap["receiver_account"] = KafkaTopUpResponseDto(
+                "0", "0", "0", "0", "0", "0", "0"
             )
             kafkaTemplate.send(
                 "account_to_transaction_Personal_To_Personal_Transfer", walletInfoMap
             )
         }
-
     }
 }

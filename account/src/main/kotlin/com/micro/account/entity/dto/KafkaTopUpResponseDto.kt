@@ -1,7 +1,8 @@
 package com.micro.account.entity.dto
 
-data class KafkaAccountInfoDto(
+data class KafkaTopUpResponseDto(
     var accountNumber: String,
+    var walletId: String?,
     var walletNumber: String,
     var ext_transaction_id: String,
     var userFirstName: String,
