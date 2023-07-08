@@ -4,6 +4,7 @@ import com.micro.transaction.entity.dto.P2PTransferRequestDto
 import com.micro.transaction.entity.dto.TopUpCreditCardDto
 import com.micro.transaction.service.P2PTransferService
 import com.micro.transaction.service.TopUpCreditCardService
+import com.micro.transaction.service.TransactionDetailService
 import com.micro.transaction.service.TransactionHistoryService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
@@ -23,6 +24,9 @@ class TransactionController {
 
     @Autowired
     private lateinit var transactionHistoryService: TransactionHistoryService
+
+    @Autowired
+    private lateinit var transactionDetailService: TransactionDetailService
 
     @PostMapping("/personalToPersonalTransfer")
     @ApiOperation("Personal To Personal Transfer")
@@ -48,11 +52,13 @@ class TransactionController {
         val listenerResponse = transactionHistoryService.getResponseFuture()
         return listenerResponse.get()
     }
-/*
+
 
     @GetMapping("/transactionDetail/{transactionId}/{accountNumber}")
     @ApiOperation("Get Transaction Detail By transaction_id and account_number")
-    fun transactionDetail(@PathVariable transactionId: String, @PathVariable accountNumber: String ): ResponseEntity<Any> {
-        return transactionService.transactionDetail(transactionId, accountNumber)
-    }*/
+    fun transactionDetail(@PathVariable transactionId: String, @PathVariable accountNumber: String ) : ResponseEntity<*>{
+         transactionDetailService.sendFindAccountByAccountNumber(transactionId,accountNumber)
+        val listenerResponse = transactionDetailService.getResponseFuture()
+        return listenerResponse.get()
+    }
 }
