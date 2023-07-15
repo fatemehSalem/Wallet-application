@@ -57,7 +57,7 @@ class TransactionDetailService(private val kafkaTemplate: KafkaTemplate<String, 
             val result = ResponseEntity.ok(
                 CustomResponse(
                     null,
-                    "Account get Transaction History was unsuccessful: Account Number is wrong",
+                    "Account get Transaction History was unsuccessful: Account Number or TransactionId is wrong",
                     errorCode.code
                 )
             )

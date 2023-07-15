@@ -2,15 +2,13 @@ server:
   port: 8083
 
 spring:
-  profiles:
-    default: default
   application:
     name: transaction
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: localhost:29092
     consumer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: localhost:29092
       group-id: transaction-group
       properties:
         security.protocol: PLAINTEXT
