@@ -10,12 +10,6 @@ spring:
     consumer:
       bootstrap-servers: localhost:29092
       group-id: transaction-group
-      properties:
-        security.protocol: PLAINTEXT
-        #specific.avro.reader: true
-#        deserializer.trusted.packages: java.util,java.lang,com.micro.transaction.entity.*
-#    consumer:
-#      group-id: my-consumer-group
   cloud:
     consul:
       host: localhost

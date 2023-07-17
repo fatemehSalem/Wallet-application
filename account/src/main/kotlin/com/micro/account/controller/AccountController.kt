@@ -8,6 +8,7 @@ import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
 import com.micro.account.entity.request.LoginRequest
 import com.micro.account.entity.response.CustomResponse
+import com.micro.account.entity.request.GenerateOtpCodeRequest
 import com.micro.account.entity.response.LoginResponse
 import com.micro.account.service.AccessTokenService
 import com.micro.account.service.AccountService
@@ -108,6 +109,12 @@ class AccountController {
     @ApiIgnore
     fun saveAccessToken(@PathVariable token: String, @PathVariable accountNumber: String) {
         return accessTokenService.saveAccessToken(token,accountNumber)
+    }
+
+    @PostMapping("/generateOtpCode")
+    @ApiOperation("Account generate OtpCode")
+    fun generateOtpCode(@RequestBody generateOtpCodeResponse: GenerateOtpCodeRequest): ResponseEntity<Any> {
+        return accountService.generateOtpCode(generateOtpCodeResponse)
     }
 }
 

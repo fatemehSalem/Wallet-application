@@ -2,6 +2,8 @@ server:
   port: 8081
 
 spring:
+  profiles:
+    active: docker
   application:
     name: account
   kafka:
@@ -10,11 +12,6 @@ spring:
     consumer:
       bootstrap-servers: localhost:29092
       group-id: transaction-group
-      properties:
-        security.protocol: PLAINTEXT
-
-    #specific.avro.reader: true
-#        deserializer.trusted.packages: java.util,java.lang,com.micro.account.entity.*
   cloud:
     consul:
       host: localhost
@@ -37,6 +34,7 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
+
 
 
 

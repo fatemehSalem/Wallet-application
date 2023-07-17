@@ -21,11 +21,12 @@ services:
     depends_on:
       - zookeeper
     ports:
+      - "9092:9092"
       - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -52,43 +53,20 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=admin
     volumes:
       - pgadmin-data:/var/lib/pgadmin
-
-#  account:
-#    build: ./account
-#    ports:
-#      - "8081:8081"
-#    container_name: account
-#    restart: on-failure
-#    networks:
-#      - consul-net
-#      - postgres-net
-#    depends_on:
-#      - consul
-#      - postgres
-#      - kafka
-#    environment:
-#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/accountdb?serverTimezone=UTC
-#      - SPRING_DATASOURCE_USERNAME=user
-#      - SPRING_DATASOURCE_PASSWORD=admin
-#      - spring.cloud.consul.host=consul
-#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=192.168.16.4:9092
-#
-#  transaction:
-#    build: ./transaction
-#    ports:
-#      - "8083:8083"
-#    container_name: transaction
-#    restart: on-failure
-#    networks:
-#      - consul-net
-#      - postgres-net
-#    depends_on:
-#      - consul
-#      - kafka
-#    environment:
-#      - spring.cloud.consul.host=consul
-#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=192.168.16.4:9092
+  redis:
+    image: redis
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+  rcli:
+    image: redis:latest
+    links:
+      - redis
+    command: redis-cli -h redis
 
 volumes:
   local_pgdata:
   pgadmin-data:
+  redis_data:

@@ -5,9 +5,10 @@ import com.micro.account.entity.dto.*
 import com.micro.account.entity.model.*
 import com.micro.account.entity.request.*
 import com.micro.account.entity.response.CustomResponse
+import com.micro.account.entity.request.GenerateOtpCodeRequest
+import com.micro.account.entity.response.GenerateOtpResponse
 import com.micro.account.mapper.AccountMapper
 import com.micro.account.repository.AccountRepository
-import com.micro.account.repository.OTPRepository
 import com.micro.account.utils.GeneralUtils
 import com.micro.account.utils.GeneralUtils.splitLastFourDigits
 import com.micro.account.utils.PasswordEncoderUtils
@@ -22,7 +23,7 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val tokenRetriever: TokenRetrieverService,
     private val accessTokenService: AccessTokenService,
-    private val otpRepository: OTPRepository,
+    private val redisService: RedisService
 ) {
     val accountMap: HashMap<String, AccountDto> = HashMap()
     fun findByUserPhoneNumber(userPhoneNumber: String): Account? {
@@ -53,72 +54,84 @@ class AccountService(
         val accountDto = accountMap["123"]
         val account = Account()
         if (accountDto != null) {
-            if (accountDto.otpCode != otpCheck.user_otp_code || accountDto.userPhoneNumber != otpCheck.user_phone_number) {
-                val errorCode = ErrorCode.INVALID_OTP_CODE
+            val isExpired = redisService.dataIsExpired(otpCheck.uuid)
+            if(isExpired){
+                val errorCode = ErrorCode.OTP_CODE_IS_EXPIRED
                 val response = CustomResponse(
                     null,
-                    "create Account was unsuccessful: OTP code or Phone number is invalid",
+                    "create Account was unsuccessful: OTP code has expired, please create a new one",
                     errorCode.code
                 )
                 return ResponseEntity.ok(response)
-            } else {
-                try {
-                    val contactAddress = ContactAddress(
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        ""
+            } else{
+                if (accountDto.otpCode != otpCheck.user_otp_code || accountDto.userPhoneNumber != otpCheck.user_phone_number) {
+                    val errorCode = ErrorCode.INVALID_OTP_CODE
+                    val response = CustomResponse(
+                        null,
+                        "Account creation was unsuccessful: the OTP code or phone number is invalid.",
+                        errorCode.code
                     )
-
-                    val accountRequest = AccountRequestToSave(
-                        accountDto.accountNumber,
-                        accountDto.currencyCode,
-                        accountDto.alias,
-                        accountDto.userNumber,
-                        accountDto.userFirstName,
-                        accountDto.userLastName,
-                        accountDto.userPhoneCountryCode,
-                        accountDto.userPhoneNumber,
-                        accountDto.userEmail,
-                        contactAddress
-                    )
-                    val payload = callAccountRegister(accountRequest)
-
-                    account.accountNumber = payload.account_number.toString()
-                    account.walletNumber = payload.wallet_number.toString()
-                    account.currencyCode = accountRequest.currency_code
-                    account.alias = accountRequest.alias
-                    account.userNumber = accountRequest.user_number
-                    account.userFirstName = accountRequest.user_first_name
-                    account.userLastName = accountRequest.user_last_name
-                    account.userPhoneCountryCode = accountRequest.user_phone_country_code
-                    account.userPhoneNumber = accountRequest.user_phone_number
-                    account.userEmail = accountRequest.user_email
-                    account.addressLine1 = accountRequest.contact_address.address_line1
-                    account.addressLine2 = accountRequest.contact_address.address_line2
-                    account.zipPostalCode = accountRequest.contact_address.zip_postal_code
-                    account.stateProvinceCode = accountRequest.contact_address.state_province_code
-                    account.password = PasswordEncoderUtils.encryptPassword(accountDto.password)
-                    account.createdAt = LocalDateTime.now()
-                    account.updatedAt = LocalDateTime.now()
-                    accountRepository.save(account)
-
-                } catch (e: Exception) {
-                    val errorCode = ErrorCode.CREATE_ACCOUNT_WAS_UNSUCCESSFUL
-                    val response = CustomResponse(null, "create Account was unsuccessful", errorCode.code)
                     return ResponseEntity.ok(response)
+                } else {
+                    try {
+                        val contactAddress = ContactAddress(
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                        )
+
+                        val accountRequest = AccountRequestToSave(
+                            accountDto.accountNumber,
+                            accountDto.currencyCode,
+                            accountDto.alias,
+                            accountDto.userNumber,
+                            accountDto.userFirstName,
+                            accountDto.userLastName,
+                            accountDto.userPhoneCountryCode,
+                            accountDto.userPhoneNumber,
+                            accountDto.userEmail,
+                            contactAddress
+                        )
+                        val payload = callAccountRegister(accountRequest)
+
+                        account.accountNumber = payload.account_number.toString()
+                        account.walletNumber = payload.wallet_number.toString()
+                        account.currencyCode = accountRequest.currency_code
+                        account.alias = accountRequest.alias
+                        account.userNumber = accountRequest.user_number
+                        account.userFirstName = accountRequest.user_first_name
+                        account.userLastName = accountRequest.user_last_name
+                        account.userPhoneCountryCode = accountRequest.user_phone_country_code
+                        account.userPhoneNumber = accountRequest.user_phone_number
+                        account.userEmail = accountRequest.user_email
+                        account.addressLine1 = accountRequest.contact_address.address_line1
+                        account.addressLine2 = accountRequest.contact_address.address_line2
+                        account.zipPostalCode = accountRequest.contact_address.zip_postal_code
+                        account.stateProvinceCode = accountRequest.contact_address.state_province_code
+                        account.password = PasswordEncoderUtils.encryptPassword(accountDto.password)
+                        account.createdAt = LocalDateTime.now()
+                        account.updatedAt = LocalDateTime.now()
+                        accountRepository.save(account)
+
+                    } catch (e: Exception) {
+                        val errorCode = ErrorCode.CREATE_ACCOUNT_WAS_UNSUCCESSFUL
+                        val response = CustomResponse(null, "Account creation was unsuccessful", errorCode.code)
+                        return ResponseEntity.ok(response)
+                    }
                 }
+                val response =
+                    CustomResponse(AccountMapper.mapAccountToAccountResponse(account), "Account creation was Successful")
+                return ResponseEntity.ok(response)
             }
-            val response =
-                CustomResponse(AccountMapper.mapAccountToAccountResponse(account), "create Account was Successful")
-            return ResponseEntity.ok(response)
+
         }
-        val response = CustomResponse("", "create Account was unsuccessful: Something Is Wrong", 401)
+        val response = CustomResponse("", "Account creation was unsuccessful: something is wrong.", 401)
         return ResponseEntity.ok(response)
     }
 
@@ -143,14 +156,6 @@ class AccountService(
                 if (user.userPhoneNumber == userPhoneNumber) {
                     if (PasswordEncoderUtils.verifyPassword(password, user.password)) {
                         retVal = true
-                        val code = splitLastFourDigits(userPhoneNumber)
-                        if (otpRepository.findByUserPhoneNumber(userPhoneNumber) == null) {
-                            val otpToSave = OTP()
-                            otpToSave.userPhoneNumber = userPhoneNumber
-                            otpToSave.userOtpCode = code
-                            otpToSave.createdAt = LocalDateTime.now()
-                            otpRepository.save(otpToSave)
-                        }
                     }
                 }
             }
@@ -161,9 +166,9 @@ class AccountService(
     }
 
     fun generateOtp(phoneNumber: String): ResponseEntity<Any> {
-
+        val code = splitLastFourDigits(phoneNumber)
         val response = CustomResponse(
-            null,
+            GenerateOtpResponse(redisService.saveData(code, phoneNumber, System.currentTimeMillis())),
             "OTP code is generated successfully"
         )
         return ResponseEntity.ok(response)
@@ -171,9 +176,18 @@ class AccountService(
 
 
     fun verifyOTP(otpCheck: OTPCheck): ResponseEntity<Any> {
-        val otp = otpRepository.findByUserPhoneNumber(otpCheck.user_phone_number)
-        if (otp != null) {
-            if (otp.userOtpCode == otpCheck.user_otp_code && otp.userPhoneNumber == otpCheck.user_phone_number) {
+        if(redisService.dataIsExpired(otpCheck.uuid)){
+            val errorCode = ErrorCode.OTP_CODE_IS_EXPIRED
+            val response = CustomResponse(
+                null,
+                "create Account was unsuccessful: OTP code has expired, please create a new one",
+                errorCode.code
+            )
+            return ResponseEntity.ok(response)
+        } else{
+            val savedData: Map<String, Any>? = redisService.getData(otpCheck.uuid)
+            val userOtpCode: String? = savedData?.get("userOtpCode") as? String
+            if (userOtpCode == otpCheck.user_otp_code && userOtpCode == otpCheck.user_phone_number) {
                 val response = CustomResponse(null, "Account OTP verification was Successful")
                 return ResponseEntity.ok(response)
             }
@@ -181,7 +195,7 @@ class AccountService(
         val errorCode = ErrorCode.INVALID_OTP_CODE
         val response = CustomResponse(
             null,
-            "Account OTP verification was unsuccessful: OTP code or Phone number is invalid", errorCode.code
+            "Account OTP verification was unsuccessful: the OTP code or phone number is invalid.", errorCode.code
         )
         return ResponseEntity.ok(response)
     }
@@ -201,7 +215,7 @@ class AccountService(
         val errorCode = ErrorCode.ACCOUNT_IS_NOT_FOUND
         val response3 = CustomResponse(
             null,
-            "Get Account Info was not successful: Account is not found!", errorCode.code
+            "Get Account Info was not successful: Account not found!", errorCode.code
         )
         return ResponseEntity.ok(response3)
     }
@@ -236,7 +250,7 @@ class AccountService(
         val errorCode = ErrorCode.ACCOUNT_GET_INFO_WAS_UNSUCCESSFUL
         val response3 = CustomResponse(
             null,
-            "Get Account Info was not successful: Account is not found!", errorCode.code
+            "Get Account Info was not successful: Account not found!", errorCode.code
         )
         return ResponseEntity.ok(response3)
     }
@@ -253,7 +267,7 @@ class AccountService(
         val errorCode = ErrorCode.ACCOUNT_CHANGE_PASSWORD_WAS_UNSUCCESSFUL
         val response = CustomResponse(
             null,
-            "Change Account Password was not successful: Account is not found!", errorCode.code
+            "Change Account Password was not successful: Account not found!", errorCode.code
         )
         return ResponseEntity.ok(response)
     }
@@ -264,6 +278,13 @@ class AccountService(
 
     fun saveAccount(account:Account):Account?{
         return  accountRepository.save(account)
+    }
+
+    fun generateOtpCode(request : GenerateOtpCodeRequest): ResponseEntity<Any>  {
+        val code = splitLastFourDigits(request.user_phone_number)
+        val response = CustomResponse(GenerateOtpResponse(redisService.saveData(code, request.user_phone_number, System.currentTimeMillis())),
+            "Generating a new OTP code was successful!")
+        return ResponseEntity.ok(response)
     }
 
 }
