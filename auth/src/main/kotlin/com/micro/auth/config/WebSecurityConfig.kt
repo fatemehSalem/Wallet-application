@@ -22,7 +22,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-internal class WebSecurityConfig{
+internal class WebSecurityConfig {
 
 
     @Autowired
@@ -31,10 +31,6 @@ internal class WebSecurityConfig{
     @Autowired
     private lateinit var userDetailsService: UserDetailsService
 
-/*    private val unauthorizedHandler: AuthEntryPointJwt? = null
-
-    private val authenticationJwtTokenFilter: AuthTokenFilter? = null
-*/
     @Autowired
     @Throws(java.lang.Exception::class)
     open fun configureGlobal(auth: AuthenticationManagerBuilder) {
@@ -54,36 +50,9 @@ internal class WebSecurityConfig{
         return BCryptPasswordEncoder()
     }
 
-/*    @Bean
-    @Throws(Exception::class)
-    override fun authenticationManagerBean(): AuthenticationManager {
-        return super.authenticationManagerBean()
-    }*/
-/*    @Bean
-    @Throws(Exception::class)
-     fun  configure(httpSecurity: HttpSecurity) {
-        httpSecurity.csrf().disable()
-            .authorizeRequests().antMatchers(*WHITELIST).permitAll().anyRequest().authenticated().and()
-            .exceptionHandling().and().sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        httpSecurity.headers().frameOptions().disable()
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
-    }*/
-
     @Bean
     @Throws(Exception::class)
     fun filterChain(httpSecurity: HttpSecurity): SecurityFilterChain? {
-        /*http.cors().and().csrf().disable()
-            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-            .authorizeRequests()
-            .antMatchers(UrlMapping.AUTH + UrlMapping.SIGN_UP).permitAll()
-            .antMatchers(UrlMapping.AUTH + UrlMapping.LOGIN).permitAll()
-            .antMatchers(UrlMapping.VALIDATE_JWT).permitAll()
-            .antMatchers(*WHITELIST).permitAll()
-            .anyRequest().authenticated()
-       *//* http.addFilterBefore(authenticationJwtTokenFilter, UsernamePasswordAuthenticationFilter::class.java)*//*
-        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)*/
         httpSecurity.csrf().disable()
             .authorizeRequests().antMatchers(*WHITELIST).permitAll().anyRequest().authenticated().and()
             .exceptionHandling().and().sessionManagement()

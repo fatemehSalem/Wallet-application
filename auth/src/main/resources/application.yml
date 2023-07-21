@@ -1,30 +1,21 @@
-spring:
-  application:
-    name: auth
-  cloud:
-    consul:
-      host: consul
-      port: 8500
-    loadbalancer:
-      ribbon:
-        enabled: false
-
 server:
-  port: 8080
-
----
+  port: 8085
 
 spring:
-  profiles: dev
   application:
     name: auth
+  security:
+    jwt:
+      secret: "hepCardSecret"
+  kafka:
+    producer:
+      bootstrap-servers: localhost:29092
+    consumer:
+      bootstrap-servers: localhost:29092
+      group-id: authentication-group
   cloud:
     consul:
       host: localhost
       port: 8500
-    loadbalancer:
-      ribbon:
-        enabled: false
-
-server:
-  port: 0
+      discovery:
+        prefer-ip-address: true

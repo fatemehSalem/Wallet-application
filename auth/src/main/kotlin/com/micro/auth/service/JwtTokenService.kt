@@ -54,11 +54,6 @@ class JwtTokenService(
         return mapOf("accessToken" to accessToken, "refreshToken" to refreshToken)
     }
 
-/*    fun getUsernameFromToken(token: String): String? {
-        val claims: Claims = jwtParser.parseClaimsJws(token).body
-        return claims.subject
-    }*/
-
     fun validateToken(token: String): Boolean {
         return try {
             val claims: Jws<Claims> = Jwts.parserBuilder()

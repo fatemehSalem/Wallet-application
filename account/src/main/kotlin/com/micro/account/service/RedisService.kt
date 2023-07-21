@@ -1,5 +1,6 @@
 package com.micro.account.service
 
+import com.micro.account.entity.dto.AccountDto
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.util.*
@@ -7,7 +8,8 @@ import java.util.*
 @Service
 class RedisService(private val redisTemplate: RedisTemplate<String, Any>) {
 
-    fun saveData(userOtpCode: String, userPhoneNumber: String, otpCreatedTime: Long): String {
+//    ------------------- OTP -------------------
+    fun saveOtpDataInRedis(userOtpCode: String, userPhoneNumber: String, otpCreatedTime: Long): String {
         val uuid = UUID.randomUUID().toString()
         val data = mapOf(
             "userOtpCode" to userOtpCode,
@@ -18,32 +20,42 @@ class RedisService(private val redisTemplate: RedisTemplate<String, Any>) {
         return uuid
     }
 
-    fun getData(uuid: String): Map<String, Any>? {
+    fun getDataInRedis(uuid: String): Map<String, Any>? {
         return redisTemplate.opsForHash<String, Any>().entries(uuid)
     }
 
-/*    fun getDataByPhoneNumber(userPhoneNumber: String): Map<String, Any>? {
-        val keys = redisTemplate.keys("*") // Get all keys in the Redis database
-        for (key in keys) {
-            val savedData = getData(key)
-            val phoneNumber = savedData?.get("userPhoneNumber") as? String
-            if (phoneNumber == userPhoneNumber) {
-                return savedData
-            }
-        }
-        return null // Data not found for the specified phone number
-    }*/
-
-    fun dataIsExpired(uuid: String): Boolean {
+    fun dataIsExpiredInRedis(uuid: String): Boolean {
         val currentTime = System.currentTimeMillis()
-        val savedData = getData(uuid)
+        val savedData = getDataInRedis(uuid)
         val otpCreatedTime = savedData?.get("otpCreatedTime") as? Long
 
         if (otpCreatedTime != null && currentTime - otpCreatedTime > 120000) {
-            redisTemplate.delete(uuid)
+           // redisTemplate.delete(uuid)
             return true
         }
 
         return false //return UUID
+    }
+
+//    ------------------- Account Information -------------------
+    fun saveAccountDataInRedis(accountDto: AccountDto): String {
+        val uuid = UUID.randomUUID().toString()
+        val data = mapOf(
+            "accountNumber" to accountDto.accountNumber,
+            "password" to accountDto.password,
+            "currencyCode" to accountDto.currencyCode,
+            "alias" to accountDto.alias,
+            "userNumber" to accountDto.userNumber,
+            "userFirstName" to accountDto.userFirstName,
+            "userLastName" to accountDto.userLastName,
+            "userPhoneCountryCode" to accountDto.userPhoneCountryCode,
+            "userPhoneNumber" to accountDto.userPhoneNumber,
+            "userEmail" to accountDto.userEmail,
+            "otpCode" to accountDto.otpCode,
+            "otpCreatedTime" to System.currentTimeMillis()
+
+        )
+        redisTemplate.opsForHash<String, Any>().putAll(uuid, data)
+        return uuid
     }
 }

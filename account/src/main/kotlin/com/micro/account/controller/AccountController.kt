@@ -1,8 +1,6 @@
 package com.micro.account.controller
 
 import com.micro.account.entity.ErrorCode
-import com.micro.account.entity.model.AccessToken
-import com.micro.account.entity.model.Account
 import com.micro.account.entity.model.OTPCheck
 import com.micro.account.entity.request.AccountRequest
 import com.micro.account.entity.request.ChangeAccountPasswordRequest
@@ -10,15 +8,13 @@ import com.micro.account.entity.request.LoginRequest
 import com.micro.account.entity.response.CustomResponse
 import com.micro.account.entity.request.GenerateOtpCodeRequest
 import com.micro.account.entity.response.LoginResponse
-import com.micro.account.service.AccessTokenService
 import com.micro.account.service.AccountService
-import com.micro.account.service.TokenRetrieverService
+import com.micro.account.service.OtpService
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.annotations.ApiIgnore
 
 @RestController
 @RequestMapping("/api/account")
@@ -27,31 +23,50 @@ class AccountController {
 
     @Autowired
     private lateinit var accountService: AccountService
+
     @Autowired
-    private lateinit var tokenRetrieverService: TokenRetrieverService
-    @Autowired
-    private lateinit var accessTokenService: AccessTokenService
+    private lateinit var otpService: OtpService
 
 
     @PostMapping("/login")
     @ApiOperation("Account Login")
     fun login(@RequestBody loginRequest: LoginRequest): ResponseEntity<Any> {
         if (accountService.authenticate(loginRequest.user_phone_number, loginRequest.user_password)) {
-            accountService.generateOtp(loginRequest.user_phone_number)
             val response = accountService.findByUserPhoneNumber(loginRequest.user_phone_number)
-                ?.let { CustomResponse(LoginResponse(it.accountNumber), "Account Authentication was Successful") }
+                ?.let {
+                    CustomResponse(
+                        LoginResponse(
+                            it.accountNumber,
+                            accountService.generateOtpForLogin(loginRequest.user_phone_number)
+                        ), "Account Authentication was Successful"
+                    )
+                }
             return ResponseEntity.ok(response)
         }
         val errorCode = ErrorCode.ACCOUNT_AUTHENTICATION_WAS_UNSUCCESSFUL
-        val response = CustomResponse(null, "Account Authentication was unsuccessful", errorCode.code)
+        val response = CustomResponse(null, "Account Authentication for login was unsuccessful", errorCode.code)
         return ResponseEntity.ok(response)
 
+    }
+
+    //****Should implement in OTP service****
+    @PostMapping("/generateNewOtpCode")
+    @ApiOperation("Account authenticate")
+    fun generateNewOtpCodeAfterExpiration(@RequestBody request: GenerateOtpCodeRequest): ResponseEntity<Any> {
+        return otpService.generateNewOtpCodeAfterExpiration(request)
+    }
+
+
+    @PostMapping("/authenticate")
+    @ApiOperation("Account authenticate")
+    fun login(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any> {
+        return accountService.verifyOTP(otpCheck)
     }
 
     @PostMapping("/register")
     @ApiOperation("Register New Account")
     fun createAccountBeforeOTP(@RequestBody accountRequest: AccountRequest): ResponseEntity<Any> {
-        //1_Account info stored in Memory and OTP code generated
+        //1_Account info stored in Memory(Redis) and OTP code generated
         return accountService.createNewAccountInMemory(accountRequest)
         // }
     }
@@ -59,13 +74,8 @@ class AccountController {
     @PostMapping("/signup")
     @ApiOperation("Account SignUp")
     fun createAccountBeforeOTP(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any> {
+        //2_Account info stored in db
         return accountService.createNewAccount(otpCheck)
-    }
-
-    @PostMapping("/authenticate")
-    @ApiOperation("Account authenticate")
-    fun login(@RequestBody otpCheck: OTPCheck): ResponseEntity<Any> {
-        return accountService.verifyOTP(otpCheck)
     }
 
     @GetMapping("/getAccountInfo/{accountNumber}")
@@ -81,41 +91,6 @@ class AccountController {
     }
 
 
-    @PostMapping("/saveAccount")
-    @ApiIgnore
-    fun saveAccount(@RequestBody account: Account): Account? {
-        return accountService.saveAccount(account)
-    }
-
-    @GetMapping("/retrieveToken")
-    @ApiIgnore
-    fun retrieveToken(): String {
-        return tokenRetrieverService.retrieveToken()
-    }
-
-    @GetMapping("/accessTokenByAccountNumber/{accountNumber}")
-    @ApiIgnore
-    fun accessTokenByAccountNumber(@PathVariable accountNumber: String): AccessToken? {
-        return accessTokenService.findByAccountNumber(accountNumber)
-    }
-
-    @GetMapping("/isAccessTokenExpired/{accountNumber}")
-    @ApiIgnore
-    fun isAccessTokenExpired(@PathVariable accountNumber: String): Boolean? {
-        return accessTokenService.isAccessTokenExpired(accountNumber)
-    }
-
-    @GetMapping("/saveAccessToken/{token}/{accountNumber}")
-    @ApiIgnore
-    fun saveAccessToken(@PathVariable token: String, @PathVariable accountNumber: String) {
-        return accessTokenService.saveAccessToken(token,accountNumber)
-    }
-
-    @PostMapping("/generateOtpCode")
-    @ApiOperation("Account generate OtpCode")
-    fun generateOtpCode(@RequestBody generateOtpCodeResponse: GenerateOtpCodeRequest): ResponseEntity<Any> {
-        return accountService.generateOtpCode(generateOtpCodeResponse)
-    }
 }
 
 
